@@ -218,6 +218,83 @@ program
     console.log(chalk.cyan(`thoth-core v${result.version}`));
   });
 
+// Key command - symbol reference
+program
+  .command('key')
+  .description('Symbol reference guide')
+  .action(() => {
+    console.log(chalk.bold.white('\n𓅝 THOTH KEY — Symbol Reference\n'));
+    
+    // Zodiac Signs
+    console.log(chalk.bold.cyan('── ZODIAC SIGNS ──'));
+    console.log('   ♈ Ari  Aries        ♎ Lib  Libra');
+    console.log('   ♉ Tau  Taurus       ♏ Sco  Scorpio');
+    console.log('   ♊ Gem  Gemini       ♐ Sag  Sagittarius');
+    console.log('   ♋ Can  Cancer       ♑ Cap  Capricorn');
+    console.log('   ♌ Leo  Leo          ♒ Aqu  Aquarius');
+    console.log('   ♍ Vir  Virgo        ♓ Pis  Pisces');
+    console.log('');
+    
+    // Planets
+    console.log(chalk.bold.cyan('── PLANETS ──'));
+    console.log('   ☉ SUN  Sun          ♄ SAT  Saturn');
+    console.log('   ☽ MOO  Moon         ♅ URA  Uranus');
+    console.log('   ☿ MER  Mercury      ♆ NEP  Neptune');
+    console.log('   ♀ VEN  Venus        ♇ PLU  Pluto');
+    console.log('   ♂ MAR  Mars');
+    console.log('   ♃ JUP  Jupiter');
+    console.log('');
+    
+    // Points
+    console.log(chalk.bold.cyan('── POINTS ──'));
+    console.log('   ⚷ CHI  Chiron       Wounded healer');
+    console.log('   ⚸ LIL  Lilith       Black Moon (primal/hidden)');
+    console.log('   ☊ NN   North Node   Karmic direction');
+    console.log('   ☋ SN   South Node   Karmic past');
+    console.log('');
+    
+    // Angles
+    console.log(chalk.bold.cyan('── ANGLES ──'));
+    console.log('   ASC    Ascendant    Rising sign (1H cusp)');
+    console.log('   IC     Imum Coeli   Roots, foundation (4H cusp)');
+    console.log('   DSC    Descendant   Partnerships (7H cusp)');
+    console.log('   MC     Medium Coeli Public self, career (10H cusp)');
+    console.log('');
+    
+    // Aspects with Hermetic colors
+    console.log(chalk.bold.cyan('── ASPECTS ──'));
+    console.log(`   ${chalk.yellow('☌ CNJ')}  Conjunction   0°   Union, fusion ${chalk.dim('(Tiphareth/☉)')}`);
+    console.log(`   ${chalk.magenta('☍ OPP')}  Opposition  180°   Polarity, awareness ${chalk.dim('(Yesod/☽)')}`);
+    console.log(`   ${chalk.blue('△ TRI')}  Trine       120°   Grace, flow ${chalk.dim('(Chesed/♃)')}`);
+    console.log(`   ${chalk.red('□ SQR')}  Square       90°   Challenge, growth ${chalk.dim('(Geburah/♂)')}`);
+    console.log(`   ${chalk.green('⚹ SXT')}  Sextile      60°   Opportunity ${chalk.dim('(Netzach/♀)')}`);
+    console.log(`   ${chalk.hex('#FF8C00')('⍟ QNT')}  Quintile     72°   Genius, creativity ${chalk.dim('(Hod/☿)')}`);
+    console.log(`   ${chalk.cyan('⚻ QCX')}  Quincunx    150°   Adjustment, tension`);
+    console.log('');
+    
+    // Elements
+    console.log(chalk.bold.cyan('── ELEMENTS ──'));
+    console.log(`   ${chalk.red('🜂 Fire')}    Aries, Leo, Sagittarius      ${chalk.dim('Spirit, will, action')}`);
+    console.log(`   ${chalk.green('🜃 Earth')}   Taurus, Virgo, Capricorn     ${chalk.dim('Matter, form, stability')}`);
+    console.log(`   ${chalk.cyan('🜁 Air')}     Gemini, Libra, Aquarius      ${chalk.dim('Mind, communication')}`);
+    console.log(`   ${chalk.blue('🜄 Water')}   Cancer, Scorpio, Pisces      ${chalk.dim('Emotion, intuition')}`);
+    console.log('');
+    
+    // Modalities
+    console.log(chalk.bold.cyan('── MODALITIES ──'));
+    console.log('   Cardinal   Initiating    Ari, Can, Lib, Cap');
+    console.log('   Fixed      Stabilizing   Tau, Leo, Sco, Aqu');
+    console.log('   Mutable    Adapting      Gem, Vir, Sag, Pis');
+    console.log('');
+    
+    // Other symbols
+    console.log(chalk.bold.cyan('── OTHER ──'));
+    console.log(`   ${chalk.red('℞')}  Retrograde    Planet appears to move backward`);
+    console.log('   H  House         e.g., 4H = Fourth House');
+    console.log('   →  Flow          e.g., 2H→4H (transit H → natal H)');
+    console.log('');
+  });
+
 // Banner
 console.log(chalk.dim(''));
 console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli'));
