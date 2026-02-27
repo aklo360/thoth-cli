@@ -320,14 +320,27 @@ export function formatTransits(result: TransitResult): string {
     lines.push('');
   }
   
-  // Transit aspects to natal - ultra lean table
+  // Transit aspects to natal - with short body names
   lines.push(chalk.bold.cyan('── TRANSITS TO NATAL ──'));
   if (result.aspects.length === 0) {
     lines.push(chalk.dim('   No aspects within orb'));
   } else {
+    // Short planet names
+    const shortName = (name: string): string => {
+      const map: Record<string, string> = {
+        'sun': 'SUN', 'moon': 'MOO', 'mercury': 'MER', 'venus': 'VEN', 'mars': 'MAR',
+        'jupiter': 'JUP', 'saturn': 'SAT', 'uranus': 'URA', 'neptune': 'NEP', 'pluto': 'PLU',
+        'chiron': 'CHI', 'nn': 'NN', 'sn': 'SN', 'lilith': 'LIL',
+        'mc': 'MC', 'ic': 'IC', 'asc': 'ASC', 'dsc': 'DSC'
+      };
+      return map[name.toLowerCase()] || name.slice(0, 3).toUpperCase();
+    };
+
     for (const aspect of result.aspects) {
       const tSym = getPlanetSymbol(aspect.transit_planet.toLowerCase().replace(/ /g, '_'));
       const nSym = getPlanetSymbol(aspect.natal_planet.toLowerCase().replace(/ /g, '_'));
+      const tName = shortName(aspect.transit_planet);
+      const nName = shortName(aspect.natal_planet);
       const aSym = getAspectSymbol(aspect.aspect);
       const aspectShort = aspect.aspect === 'conjunction' ? 'CNJ' :
                          aspect.aspect === 'opposition' ? 'OPP' :
@@ -344,15 +357,14 @@ export function formatTransits(result: TransitResult): string {
                          aspect.aspect === 'square' ? chalk.red :
                          aspect.aspect === 'sextile' ? chalk.blue : chalk.white;
       
-      // Houses: transit → natal (with H notation)
+      // Houses: transit → natal
       const tH = (aspect as any).transit_house;
       const nH = (aspect as any).natal_house;
       const houses = `${tH || '?'}H→${nH || '?'}H`;
       
-      // Format: transit_sym aspect_sym natal_sym | aspect_short | orb | houses
-      // Columns: symbol(2) symbol(2) symbol(2) | name(3) | orb(5) | houses(5)
+      // Format: sym NAME aspect sym NAME | orb | houses
       const orb = aspect.orb.toFixed(2).padStart(5);
-      lines.push(`   ${chalk.cyan(tSym)} ${aspectColor(aSym)} ${chalk.magenta(nSym)}  ${aspectColor(aspectShort)}  ${chalk.dim(orb + '°')}  ${chalk.dim(houses)}`);
+      lines.push(`   ${chalk.cyan(tSym)} ${tName.padEnd(3)} ${aspectColor(aSym)} ${aspectShort} ${chalk.magenta(nSym)} ${nName.padEnd(3)}  ${chalk.dim(orb + '°')}  ${chalk.dim(houses)}`);
     }
   }
   
