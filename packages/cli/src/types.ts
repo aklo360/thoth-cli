@@ -90,8 +90,10 @@ export interface ChartOptions {
   day: number;
   hour?: number;
   minute?: number;
-  lat: number;
-  lng: number;
+  lat?: number;
+  lng?: number;
+  city?: string;
+  nation?: string;
   name?: string;
 }
 
@@ -101,8 +103,10 @@ export interface TransitOptions {
   natalDay: number;
   natalHour?: number;
   natalMinute?: number;
-  natalLat: number;
-  natalLng: number;
+  natalLat?: number;
+  natalLng?: number;
+  natalCity?: string;
+  nation?: string;
   transitYear?: number;
   transitMonth?: number;
   transitDay?: number;

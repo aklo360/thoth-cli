@@ -24,11 +24,19 @@ program
   .description('Calculate a natal chart')
   .requiredOption('--date <date>', 'Birth date (YYYY-MM-DD)')
   .requiredOption('--time <time>', 'Birth time (HH:MM)')
-  .requiredOption('--lat <lat>', 'Latitude', parseFloat)
-  .requiredOption('--lng <lng>', 'Longitude', parseFloat)
+  .option('--lat <lat>', 'Latitude', parseFloat)
+  .option('--lng <lng>', 'Longitude', parseFloat)
+  .option('--city <city>', 'City name (e.g., "New York")')
+  .option('--nation <nation>', 'Country code (e.g., US, UK)', 'US')
   .option('--name <name>', 'Name', 'Subject')
   .option('--json', 'Output raw JSON')
   .action(async (options) => {
+    // Validate: need either city or lat/lng
+    if (!options.city && (!options.lat || !options.lng)) {
+      console.error(chalk.red('Error: Must provide either --city or both --lat and --lng'));
+      process.exit(1);
+    }
+    
     const spinner = ora('Calculating chart...').start();
     
     const [year, month, day] = options.date.split('-').map(Number);
@@ -38,6 +46,8 @@ program
       year, month, day, hour, minute,
       lat: options.lat,
       lng: options.lng,
+      city: options.city,
+      nation: options.nation,
       name: options.name,
     });
     
@@ -61,12 +71,20 @@ program
   .description('Calculate transits to a natal chart')
   .requiredOption('--natal-date <date>', 'Natal date (YYYY-MM-DD)')
   .requiredOption('--natal-time <time>', 'Natal time (HH:MM)')
-  .requiredOption('--lat <lat>', 'Latitude', parseFloat)
-  .requiredOption('--lng <lng>', 'Longitude', parseFloat)
+  .option('--lat <lat>', 'Latitude', parseFloat)
+  .option('--lng <lng>', 'Longitude', parseFloat)
+  .option('--city <city>', 'City name (e.g., "New York")')
+  .option('--nation <nation>', 'Country code (e.g., US, UK)', 'US')
   .option('--transit-date <date>', 'Transit date (YYYY-MM-DD, default: today)')
   .option('--orb <degrees>', 'Orb in degrees', parseFloat, 3)
   .option('--json', 'Output raw JSON')
   .action(async (options) => {
+    // Validate: need either city or lat/lng
+    if (!options.city && (!options.lat || !options.lng)) {
+      console.error(chalk.red('Error: Must provide either --city or both --lat and --lng'));
+      process.exit(1);
+    }
+    
     const spinner = ora('Calculating transits...').start();
     
     const [natalYear, natalMonth, natalDay] = options.natalDate.split('-').map(Number);
@@ -81,6 +99,8 @@ program
       natalYear, natalMonth, natalDay, natalHour, natalMinute,
       natalLat: options.lat,
       natalLng: options.lng,
+      natalCity: options.city,
+      nation: options.nation,
       transitYear, transitMonth, transitDay,
       orb: options.orb,
     });

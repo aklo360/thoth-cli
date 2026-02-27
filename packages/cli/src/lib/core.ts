@@ -54,10 +54,16 @@ export async function chart(options: ChartOptions): Promise<ThothResult<ChartRes
     '--day', String(options.day),
     '--hour', String(options.hour ?? 12),
     '--minute', String(options.minute ?? 0),
-    '--lat', String(options.lat),
-    '--lng', String(options.lng),
     '--name', options.name ?? 'Subject',
   ];
+  
+  if (options.city) {
+    args.push('--city', options.city);
+    args.push('--nation', options.nation ?? 'US');
+  } else if (options.lat !== undefined && options.lng !== undefined) {
+    args.push('--lat', String(options.lat));
+    args.push('--lng', String(options.lng));
+  }
   
   return execute<ChartResult>('chart', args);
 }
@@ -72,10 +78,16 @@ export async function transit(options: TransitOptions): Promise<ThothResult<Tran
     '--natal-day', String(options.natalDay),
     '--natal-hour', String(options.natalHour ?? 12),
     '--natal-minute', String(options.natalMinute ?? 0),
-    '--natal-lat', String(options.natalLat),
-    '--natal-lng', String(options.natalLng),
     '--orb', String(options.orb ?? 3),
   ];
+  
+  if (options.natalCity) {
+    args.push('--natal-city', options.natalCity);
+    args.push('--nation', options.nation ?? 'US');
+  } else if (options.natalLat !== undefined && options.natalLng !== undefined) {
+    args.push('--natal-lat', String(options.natalLat));
+    args.push('--natal-lng', String(options.natalLng));
+  }
   
   if (options.transitYear) args.push('--transit-year', String(options.transitYear));
   if (options.transitMonth) args.push('--transit-month', String(options.transitMonth));

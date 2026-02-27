@@ -35,21 +35,35 @@ def chart(
     day: int = typer.Option(..., help="Birth day"),
     hour: int = typer.Option(12, help="Birth hour (24h)"),
     minute: int = typer.Option(0, help="Birth minute"),
-    lat: float = typer.Option(..., help="Latitude"),
-    lng: float = typer.Option(..., help="Longitude"),
+    lat: Optional[float] = typer.Option(None, help="Latitude"),
+    lng: Optional[float] = typer.Option(None, help="Longitude"),
+    city: Optional[str] = typer.Option(None, help="City name (e.g., 'New York')"),
+    nation: str = typer.Option("US", help="Country code (e.g., 'US', 'UK', 'BR')"),
     name: str = typer.Option("Subject", help="Subject name"),
 ):
     """Calculate natal chart."""
     try:
         from kerykeion import AstrologicalSubject
         
-        subject = AstrologicalSubject(
-            name,
-            year, month, day,
-            hour, minute,
-            lat=lat,
-            lng=lng,
-        )
+        # Use city/nation if provided, otherwise use lat/lng
+        if city:
+            subject = AstrologicalSubject(
+                name,
+                year, month, day,
+                hour, minute,
+                city=city,
+                nation=nation,
+            )
+        elif lat is not None and lng is not None:
+            subject = AstrologicalSubject(
+                name,
+                year, month, day,
+                hour, minute,
+                lat=lat,
+                lng=lng,
+            )
+        else:
+            output_error("Must provide either --city or both --lat and --lng")
         
         # Build chart data
         planets = {}
@@ -113,8 +127,10 @@ def transit(
     natal_day: int = typer.Option(..., help="Natal day"),
     natal_hour: int = typer.Option(12, help="Natal hour"),
     natal_minute: int = typer.Option(0, help="Natal minute"),
-    natal_lat: float = typer.Option(..., help="Natal latitude"),
-    natal_lng: float = typer.Option(..., help="Natal longitude"),
+    natal_lat: Optional[float] = typer.Option(None, help="Natal latitude"),
+    natal_lng: Optional[float] = typer.Option(None, help="Natal longitude"),
+    natal_city: Optional[str] = typer.Option(None, help="Natal city (e.g., 'New York')"),
+    nation: str = typer.Option("US", help="Country code (e.g., 'US', 'UK')"),
     transit_year: Optional[int] = typer.Option(None, help="Transit year (default: now)"),
     transit_month: Optional[int] = typer.Option(None, help="Transit month"),
     transit_day: Optional[int] = typer.Option(None, help="Transit day"),
@@ -125,13 +141,25 @@ def transit(
         from kerykeion import AstrologicalSubject
         
         # Create natal subject
-        natal = AstrologicalSubject(
-            "Natal",
-            natal_year, natal_month, natal_day,
-            natal_hour, natal_minute,
-            lat=natal_lat,
-            lng=natal_lng,
-        )
+        if natal_city:
+            natal = AstrologicalSubject(
+                "Natal",
+                natal_year, natal_month, natal_day,
+                natal_hour, natal_minute,
+                city=natal_city,
+                nation=nation,
+            )
+        elif natal_lat is not None and natal_lng is not None:
+            natal = AstrologicalSubject(
+                "Natal",
+                natal_year, natal_month, natal_day,
+                natal_hour, natal_minute,
+                lat=natal_lat,
+                lng=natal_lng,
+            )
+        else:
+            output_error("Must provide either --natal-city or both --natal-lat and --natal-lng")
+            return
         
         # Create transit subject (default to now)
         now = datetime.now()
@@ -141,8 +169,10 @@ def transit(
             transit_month or now.month,
             transit_day or now.day,
             now.hour, now.minute,
-            lat=natal_lat,
-            lng=natal_lng,
+            city=natal_city if natal_city else None,
+            nation=nation if natal_city else None,
+            lat=natal_lat if natal_lat else None,
+            lng=natal_lng if natal_lng else None,
         )
         
         # Calculate aspects between transit and natal planets
