@@ -1,0 +1,50 @@
+{
+  "name": "thoth-cli",
+  "version": "0.1.0",
+  "description": "𓅝 Astrological calculations from the command line. Swiss Ephemeris precision. Built for humans and agents.",
+  "author": "AKLO <aklo@aklolabs.com>",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "thoth": "./dist/bin.js"
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts src/bin.ts --format esm --dts --clean",
+    "dev": "tsup src/index.ts src/bin.ts --format esm --dts --watch",
+    "postinstall": "node scripts/postinstall.js",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "ora": "^8.0.0",
+    "execa": "^8.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "astrology",
+    "cli",
+    "ephemeris",
+    "horoscope",
+    "natal-chart",
+    "thoth"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aklo/thoth-cli.git"
+  }
+}
