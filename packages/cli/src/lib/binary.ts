@@ -90,9 +90,9 @@ export function getCommand(): { command: string; args: string[] } {
   
   if (binaryPath === 'python') {
     // Development fallback: run Python module directly
-    // Use the astro-env Python and set PYTHONPATH
+    // Use 'python' or 'python3' from PATH (works with virtualenv)
     return {
-      command: '/Users/navi/.openclaw-thoth/astro-env/bin/python',
+      command: 'python3',
       args: ['-m', 'thoth_core.cli'],
     };
   }

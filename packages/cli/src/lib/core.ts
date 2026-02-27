@@ -23,17 +23,10 @@ import type {
 async function execute<T>(subcommand: string, args: string[]): Promise<ThothResult<T>> {
   const { command, args: baseArgs } = getCommand();
   
-  // Set PYTHONPATH for development mode
-  const env = {
-    ...process.env,
-    PYTHONPATH: '/Users/navi/.openclaw-thoth/workspace/thoth-cli/packages/core',
-  };
-  
   try {
     const result = await execa(command, [...baseArgs, subcommand, ...args], {
       encoding: 'utf8',
       reject: false,
-      env,
     });
     
     if (result.exitCode !== 0) {
