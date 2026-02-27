@@ -222,11 +222,13 @@ export function formatChart(result: ChartResult): string {
       const p2 = getPlanetSymbol(asp.planet2.toLowerCase().replace(/ /g, '_'));
       const aspectSym = getAspectSymbol(asp.aspect);
       const aspectName = asp.aspect.charAt(0).toUpperCase() + asp.aspect.slice(1);
+      // Hermetic color correspondences
       const aspectColor = asp.aspect === 'conjunction' ? chalk.yellow :
-                         asp.aspect === 'opposition' ? chalk.red :
-                         asp.aspect === 'trine' ? chalk.green :
+                         asp.aspect === 'opposition' ? chalk.magenta :
+                         asp.aspect === 'trine' ? chalk.blue :
                          asp.aspect === 'square' ? chalk.red :
-                         asp.aspect === 'sextile' ? chalk.blue : chalk.white;
+                         asp.aspect === 'sextile' ? chalk.green :
+                         asp.aspect === 'quintile' ? chalk.hex('#FF8C00') : chalk.white;
       lines.push(`   ${p1} ${asp.planet1.padEnd(10)} ${aspectColor(aspectSym + ' ' + aspectName.padEnd(11))} ${p2} ${asp.planet2.padEnd(10)} ${chalk.dim(`${asp.orb}°`)}`);
     }
     lines.push('');
@@ -243,13 +245,13 @@ function formatAspect(aspect: Aspect): string {
   const nSymbol = getPlanetSymbol(aspect.natal_planet);
   const aSymbol = getAspectSymbol(aspect.aspect);
   
-  // Color based on aspect type
+  // Hermetic color correspondences
   const aspectColors: Record<string, typeof chalk> = {
-    'conjunction': chalk.yellow,
-    'opposition': chalk.red,
-    'trine': chalk.green,
-    'square': chalk.red,
-    'sextile': chalk.blue,
+    'conjunction': chalk.yellow,    // Tiphareth/Sun
+    'opposition': chalk.magenta,    // Yesod/Moon
+    'trine': chalk.blue,            // Chesed/Jupiter
+    'square': chalk.red,            // Geburah/Mars
+    'sextile': chalk.green,         // Netzach/Venus
   };
   
   const color = aspectColors[aspect.aspect] || chalk.white;
@@ -351,11 +353,16 @@ export function formatTransits(result: TransitResult): string {
                          aspect.aspect === 'quincunx' ? 'QCX' : 
                          String(aspect.aspect).slice(0, 3).toUpperCase();
       
+      // Hermetic color correspondences:
+      // CNJ = Yellow (Tiphareth/Sun), OPP = Magenta (Yesod/Moon), TRI = Blue (Chesed/Jupiter)
+      // SQR = Red (Geburah/Mars), SXT = Green (Netzach/Venus), QNT = Orange (Hod/Mercury)
       const aspectColor = aspect.aspect === 'conjunction' ? chalk.yellow :
-                         aspect.aspect === 'opposition' ? chalk.red :
-                         aspect.aspect === 'trine' ? chalk.green :
+                         aspect.aspect === 'opposition' ? chalk.magenta :
+                         aspect.aspect === 'trine' ? chalk.blue :
                          aspect.aspect === 'square' ? chalk.red :
-                         aspect.aspect === 'sextile' ? chalk.blue : chalk.white;
+                         aspect.aspect === 'sextile' ? chalk.green :
+                         aspect.aspect === 'quintile' ? chalk.hex('#FF8C00') :
+                         aspect.aspect === 'quincunx' ? chalk.cyan : chalk.white;
       
       // Houses: transit → natal
       const tH = (aspect as any).transit_house;
