@@ -255,16 +255,60 @@ function formatAspect(aspect: Aspect): string {
 export function formatTransits(result: TransitResult): string {
   const lines: string[] = [];
   
+  // Header
   lines.push(chalk.bold.white(`\n𓅝 Transits`));
-  lines.push(chalk.dim(`   Natal: ${result.natal.datetime}`));
+  if ((result.natal as any).name) {
+    lines.push(chalk.dim(`   For: ${(result.natal as any).name}`));
+  }
+  if ((result.natal as any).city) {
+    lines.push(chalk.dim(`   Natal: ${result.natal.datetime} · ${(result.natal as any).city}`));
+  } else {
+    lines.push(chalk.dim(`   Natal: ${result.natal.datetime}`));
+  }
   lines.push(chalk.dim(`   Transit: ${result.transit.datetime}`));
+  
+  // Current lunar phase
+  if ((result.transit as any).lunar_phase) {
+    lines.push(chalk.dim(`   Moon: ${(result.transit as any).lunar_phase.emoji} ${(result.transit as any).lunar_phase.name}`));
+  }
   lines.push('');
   
+  // Current sky positions
+  if ((result.transit as any).planets) {
+    lines.push(chalk.bold.cyan('── CURRENT SKY ──'));
+    const planets = (result.transit as any).planets;
+    for (const name of ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']) {
+      const planet = planets[name];
+      if (planet) {
+        const symbol = getPlanetSymbol(name);
+        const zodiac = getZodiacSymbol(planet.sign);
+        const deg = formatDegrees(planet.position);
+        const rx = planet.retrograde ? chalk.red(' ℞') : '';
+        lines.push(`   ${chalk.yellow(symbol)} ${name.padEnd(10)} ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)}${rx}`);
+      }
+    }
+    lines.push('');
+  }
+  
+  // Transit aspects to natal
+  lines.push(chalk.bold.cyan('── TRANSITS TO NATAL ──'));
   if (result.aspects.length === 0) {
     lines.push(chalk.dim('   No aspects within orb'));
   } else {
     for (const aspect of result.aspects) {
-      lines.push('   ' + formatAspect(aspect));
+      const tSym = getPlanetSymbol(aspect.transit_planet.toLowerCase().replace(/ /g, '_'));
+      const nSym = getPlanetSymbol(aspect.natal_planet.toLowerCase().replace(/ /g, '_'));
+      const aSym = getAspectSymbol(aspect.aspect);
+      const aspectName = aspect.aspect.charAt(0).toUpperCase() + aspect.aspect.slice(1);
+      
+      const aspectColor = aspect.aspect === 'conjunction' ? chalk.yellow :
+                         aspect.aspect === 'opposition' ? chalk.red :
+                         aspect.aspect === 'trine' ? chalk.green :
+                         aspect.aspect === 'square' ? chalk.red :
+                         aspect.aspect === 'sextile' ? chalk.blue : chalk.white;
+      
+      // Format: transit planet → aspect → natal planet
+      lines.push(`   ${chalk.cyan(tSym)} ${aspect.transit_planet.padEnd(10)} ${aspectColor(aSym + ' ' + aspectName.padEnd(11))} ${chalk.magenta(nSym)} ${aspect.natal_planet.padEnd(10)} ${chalk.dim(`${aspect.orb}°`)}`);
     }
   }
   

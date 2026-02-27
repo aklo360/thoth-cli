@@ -234,58 +234,52 @@ def transit(
             lng=natal_lng if natal_lng else None,
         )
         
-        # Calculate aspects between transit and natal planets
+        # Get transit aspects using Kerykeion's SynastryAspects
+        from kerykeion import SynastryAspects
+        synastry = SynastryAspects(transit_subj, natal)
+        
         aspects = []
-        aspect_types = [
-            ("conjunction", 0, orb),
-            ("opposition", 180, orb),
-            ("trine", 120, orb),
-            ("square", 90, orb),
-            ("sextile", 60, orb),
-        ]
-        
-        transit_planets = ['sun', 'moon', 'mercury', 'venus', 'mars', 
-                          'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']
-        natal_planets = transit_planets + ['chiron', 'north_node']
-        
-        for t_name in transit_planets:
-            t_planet = getattr(transit_subj, t_name, None)
-            if not t_planet:
-                continue
-                
-            for n_name in natal_planets:
-                n_planet = getattr(natal, n_name, None)
-                if not n_planet:
-                    continue
-                
-                # Calculate angular difference
-                diff = abs(t_planet.abs_pos - n_planet.abs_pos)
-                if diff > 180:
-                    diff = 360 - diff
-                
-                # Check each aspect type
-                for aspect_name, angle, aspect_orb in aspect_types:
-                    orb_diff = abs(diff - angle)
-                    if orb_diff <= aspect_orb:
-                        aspects.append({
-                            "transit_planet": t_name,
-                            "natal_planet": n_name,
-                            "aspect": aspect_name,
-                            "orb": round(orb_diff, 2),
-                            "transit_position": round(t_planet.abs_pos, 2),
-                            "natal_position": round(n_planet.abs_pos, 2),
-                            "applying": t_planet.abs_pos < n_planet.abs_pos,  # simplified
-                        })
+        for asp in synastry.all_aspects:
+            if asp['orbit'] <= orb:
+                aspects.append({
+                    "transit_planet": asp['p1_name'],
+                    "natal_planet": asp['p2_name'],
+                    "aspect": asp['aspect'],
+                    "orb": round(asp['orbit'], 2),
+                })
         
         # Sort by orb (tightest first)
         aspects.sort(key=lambda x: x['orb'])
         
+        # Current transiting planets
+        transit_planets_data = {}
+        for p in ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']:
+            planet = getattr(transit_subj, p, None)
+            if planet:
+                transit_planets_data[p] = {
+                    "sign": planet.sign,
+                    "position": round(planet.position, 2),
+                    "retrograde": planet.retrograde if hasattr(planet, 'retrograde') else False,
+                }
+        
+        # Current lunar phase
+        lunar_phase = None
+        if hasattr(transit_subj, 'lunar_phase') and transit_subj.lunar_phase:
+            lunar_phase = {
+                "name": transit_subj.lunar_phase.moon_phase_name,
+                "emoji": transit_subj.lunar_phase.moon_emoji,
+            }
+        
         output_json({
             "natal": {
+                "name": natal.name if hasattr(natal, 'name') else "Natal",
                 "datetime": f"{natal_year}-{natal_month:02d}-{natal_day:02d}",
+                "city": natal.city if hasattr(natal, 'city') else None,
             },
             "transit": {
                 "datetime": f"{transit_year or now.year}-{(transit_month or now.month):02d}-{(transit_day or now.day):02d}",
+                "planets": transit_planets_data,
+                "lunar_phase": lunar_phase,
             },
             "aspects": aspects,
         })
