@@ -92,9 +92,13 @@ thoth-cli/
 
 ---
 
+### Privacy
+
+**No data collection. Ever.** All calculations run locally. No analytics, no telemetry, no tracking.
+
 ### License
 
-PolyForm Noncommercial 1.0.0 — Free for non-commercial use. Commercial use requires a separate license.
+MIT — Free for any use.
 
 ---
 

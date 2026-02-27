@@ -282,16 +282,22 @@ node dist/bin.js chart --date 1879-03-14 --time 11:30 --city "Ulm" --nation "DE"
 
 ---
 
+## Privacy
+
+**thoth-cli collects no data. Ever.**
+
+- ✅ All calculations run locally on your machine
+- ✅ No analytics, no telemetry, no tracking
+- ✅ No network requests except geocoding (via Geonames)
+- ✅ Your birth data stays on your computer
+
+The oracle sees but does not record.
+
+---
+
 ## License
 
-**PolyForm Noncommercial 1.0.0**
-
-- ✅ Free for personal use
-- ✅ Free for research, education, and non-profits
-- ✅ Free to modify and share (non-commercially)
-- ❌ **Commercial use requires a separate license**
-
-For commercial licensing, contact: https://github.com/aklo360
+**MIT** — Use it for anything. Free forever.
 
 ---
 

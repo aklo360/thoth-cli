@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "𓅝 Astrological calculations from the command line. Swiss Ephemeris precision. Built for humans and agents.",
   "author": "AKLO <aklo@aklolabs.com>",
-  "license": "PolyForm-Noncommercial-1.0.0",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

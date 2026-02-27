@@ -16,6 +16,10 @@ thoth ephemeris --body pluto
 thoth key
 ```
 
+## Privacy
+
+No data collection. All calculations run locally.
+
 ## License
 
-PolyForm Noncommercial 1.0.0 — Free for non-commercial use. Commercial use requires a separate license.
+MIT
