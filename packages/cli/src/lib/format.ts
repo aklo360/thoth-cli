@@ -175,22 +175,7 @@ export function formatDegrees(degrees: number): string {
   return `${d}°${m.toString().padStart(2, '0')}'`;
 }
 
-/**
- * Format a planet position
- */
-export function formatPlanetPosition(
-  name: string,
-  sign: string,
-  position: number,
-  retrograde: boolean = false
-): string {
-  const symbol = getPlanetSymbol(name);
-  const zodiac = getZodiacSymbol(sign);
-  const deg = formatDegrees(position);
-  const rx = retrograde ? chalk.red(' ℞') : '';
-  
-  return `${chalk.yellow(symbol)} ${chalk.white(name.padEnd(12))} ${chalk.cyan(zodiac)} ${chalk.magenta(deg)}${rx}`;
-}
+
 
 /**
  * Format a chart result
@@ -214,13 +199,15 @@ export function formatChart(result: ChartResult): string {
   }
   lines.push('');
   
-  // Angles
+  // Angles (ASC = Mars/Aries energy, MC = Sun energy)
   lines.push(chalk.bold.cyan('── ANGLES ──'));
   if (result.ascendant.sign) {
-    lines.push(`   ${chalk.yellow('ASC')}  ${getZodiacSymbol(result.ascendant.sign)} ${result.ascendant.sign} ${formatDegrees(result.ascendant.position || 0)}`);
+    const zColor = getZodiacColor(result.ascendant.sign);
+    lines.push(`   ${COLORS.mars('ASC')}  ${zColor(getZodiacSymbol(result.ascendant.sign) + ' ' + result.ascendant.sign)} ${chalk.white(formatDegrees(result.ascendant.position || 0))}`);
   }
   if (result.midheaven.sign) {
-    lines.push(`   ${chalk.yellow('MC')}   ${getZodiacSymbol(result.midheaven.sign)} ${result.midheaven.sign} ${formatDegrees(result.midheaven.position || 0)}`);
+    const zColor = getZodiacColor(result.midheaven.sign);
+    lines.push(`   ${COLORS.sun('MC')}   ${zColor(getZodiacSymbol(result.midheaven.sign) + ' ' + result.midheaven.sign)} ${chalk.white(formatDegrees(result.midheaven.position || 0))}`);
   }
   lines.push('');
   
@@ -283,13 +270,13 @@ export function formatChart(result: ChartResult): string {
     lines.push('');
   }
   
-  // Elements & Modes
+  // Elements & Modes (using Sephirotic colors)
   if ((result as any).elements && (result as any).modes) {
     lines.push(chalk.bold.cyan('── BALANCE ──'));
     const elem = (result as any).elements;
     const mode = (result as any).modes;
-    lines.push(`   ${chalk.red('🜂 Fire:')} ${elem.Fire}  ${chalk.green('🜃 Earth:')} ${elem.Earth}  ${chalk.cyan('🜁 Air:')} ${elem.Air}  ${chalk.blue('🜄 Water:')} ${elem.Water}`);
-    lines.push(`   ${chalk.yellow('Cardinal:')} ${mode.Cardinal}  ${chalk.magenta('Fixed:')} ${mode.Fixed}  ${chalk.white('Mutable:')} ${mode.Mutable}`);
+    lines.push(`   ${COLORS.mars('🜂 Fire:')} ${elem.Fire}  ${COLORS.venus('🜃 Earth:')} ${elem.Earth}  ${COLORS.mercury('🜁 Air:')} ${elem.Air}  ${COLORS.moon('🜄 Water:')} ${elem.Water}`);
+    lines.push(`   ${COLORS.mars('Cardinal:')} ${mode.Cardinal}  ${COLORS.sun('Fixed:')} ${mode.Fixed}  ${COLORS.mercury('Mutable:')} ${mode.Mutable}`);
     lines.push('');
   }
   
@@ -315,27 +302,7 @@ export function formatChart(result: ChartResult): string {
   return lines.join('\n');
 }
 
-/**
- * Format aspect with colors based on type
- */
-function formatAspect(aspect: Aspect): string {
-  const tSymbol = getPlanetSymbol(aspect.transit_planet);
-  const nSymbol = getPlanetSymbol(aspect.natal_planet);
-  const aSymbol = getAspectSymbol(aspect.aspect);
-  
-  // Hermetic color correspondences
-  const aspectColors: Record<string, typeof chalk> = {
-    'conjunction': chalk.yellow,    // Tiphareth/Sun
-    'opposition': chalk.magenta,    // Yesod/Moon
-    'trine': chalk.blue,            // Chesed/Jupiter
-    'square': chalk.red,            // Geburah/Mars
-    'sextile': chalk.green,         // Netzach/Venus
-  };
-  
-  const color = aspectColors[aspect.aspect] || chalk.white;
-  
-  return `${chalk.cyan(tSymbol)} ${aspect.transit_planet.padEnd(10)} ${color(aSymbol)} ${chalk.magenta(nSymbol)} ${aspect.natal_planet.padEnd(10)} ${chalk.dim(`(${aspect.orb.toFixed(2)}°)`)}`;
-}
+
 
 /**
  * Format transits result
@@ -462,13 +429,14 @@ export function formatMoon(result: MoonResult): string {
   const lines: string[] = [];
   
   const moonEmoji = result.phase.illumination > 50 ? '🌕' : '🌑';
+  const zColor = getZodiacColor(result.moon.sign);
   
   lines.push(chalk.bold.white(`\n${moonEmoji} Moon Phase`));
   lines.push(chalk.dim(`   ${result.datetime}`));
   lines.push('');
-  lines.push(`   ${chalk.cyan('☽')} ${chalk.white('Moon in')} ${chalk.magenta(result.moon.sign)} ${chalk.dim(formatDegrees(result.moon.position))}`);
-  lines.push(`   ${chalk.white('Phase:')} ${chalk.yellow(result.phase.name)}`);
-  lines.push(`   ${chalk.white('Illumination:')} ${chalk.cyan(result.phase.illumination.toFixed(1) + '%')}`);
+  lines.push(`   ${COLORS.moon('☽')} ${chalk.white('Moon in')} ${zColor(result.moon.sign)} ${chalk.white(formatDegrees(result.moon.position))}`);
+  lines.push(`   ${chalk.white('Phase:')} ${COLORS.moon(result.phase.name)}`);
+  lines.push(`   ${chalk.white('Illumination:')} ${COLORS.moon(result.phase.illumination.toFixed(1) + '%')}`);
   lines.push('');
   
   return lines.join('\n');
@@ -480,13 +448,15 @@ export function formatMoon(result: MoonResult): string {
 export function formatEphemeris(result: EphemerisResult): string {
   const lines: string[] = [];
   
+  const pColor = getPlanetColor(result.body);
+  const zColor = getZodiacColor(result.sign);
   const symbol = getPlanetSymbol(result.body);
-  const rx = result.retrograde ? chalk.red(' ℞') : '';
+  const rx = result.retrograde ? COLORS.mars(' ℞') : '';
   
   lines.push(chalk.bold.white(`\n𓅝 Ephemeris: ${result.body}`));
   lines.push(chalk.dim(`   ${result.datetime}`));
   lines.push('');
-  lines.push(`   ${chalk.yellow(symbol)} ${chalk.white(result.body)} in ${chalk.magenta(result.sign)} ${chalk.dim(formatDegrees(result.position))}${rx}`);
+  lines.push(`   ${pColor(symbol)} ${chalk.white(result.body)} in ${zColor(result.sign)} ${chalk.white(formatDegrees(result.position))}${rx}`);
   lines.push(`   ${chalk.dim(`Absolute: ${result.abs_position.toFixed(4)}°`)}`);
   lines.push('');
   

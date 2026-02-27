@@ -357,7 +357,7 @@ program
     console.log(`   ${mercury('🜁 Air')}      ${mercury('Gemini, Libra, Aquarius')}`);
     console.log(`             Mind, communication, connection, ideas`);
     console.log(`             ${chalk.dim('Hot & Wet — Sanguine — Thinking function')}`);
-    console.log(`   ${jupiter('🜄 Water')}    ${moon('Cancer, Scorpio, Pisces')}`);
+    console.log(`   ${moon('🜄 Water')}    ${moon('Cancer')}, ${pluto('Scorpio')}, ${neptune('Pisces')}`);
     console.log(`             Emotion, intuition, the unconscious, soul`);
     console.log(`             ${chalk.dim('Cold & Wet — Phlegmatic — Feeling function')}`);
     console.log('');
@@ -390,10 +390,10 @@ program
     // DIGNITIES
     // ═══════════════════════════════════════════════════════════════
     console.log(chalk.bold.cyan('══ DIGNITIES ══'));
-    console.log(`   ${chalk.bold('Domicile')}    Planet in sign it rules. Full power. ${chalk.dim('e.g., ♂ in Ari')}`);
-    console.log(`   ${chalk.bold('Exaltation')} Planet in sign of peak expression. ${chalk.dim('e.g., ☉ in Ari')}`);
-    console.log(`   ${chalk.bold('Detriment')}  Planet opposite its home. Challenged. ${chalk.dim('e.g., ♂ in Lib')}`);
-    console.log(`   ${chalk.bold('Fall')}       Planet opposite exaltation. Weakened. ${chalk.dim('e.g., ☉ in Lib')}`);
+    console.log(`   ${chalk.bold('Domicile')}    Planet in sign it rules. Full power. ${chalk.dim('e.g., Mars in Aries')}`);
+    console.log(`   ${chalk.bold('Exaltation')} Planet in sign of peak expression. ${chalk.dim('e.g., Sun in Aries')}`);
+    console.log(`   ${chalk.bold('Detriment')}  Planet opposite its home. Challenged. ${chalk.dim('e.g., Mars in Libra')}`);
+    console.log(`   ${chalk.bold('Fall')}       Planet opposite exaltation. Weakened. ${chalk.dim('e.g., Sun in Libra')}`);
     console.log('');
   });
 
