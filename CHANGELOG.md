@@ -102,4 +102,4 @@ MIT — Free for any use.
 
 ---
 
-*"As above, so below; as below, so above."* — The Emerald Tablet
+*"As above, so below; as the universe, so the soul."*
