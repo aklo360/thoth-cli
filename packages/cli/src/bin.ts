@@ -245,128 +245,135 @@ program
     // PLANETS
     // ═══════════════════════════════════════════════════════════════
     console.log(chalk.bold.cyan('══ PLANETS ══'));
-    console.log(`   ${sun('☉ SUN')}     Identity, vitality, ego, life force`);
-    console.log(`             ${chalk.dim('Rules:')} ${sun('Leo')}  ${chalk.dim('Sephira:')} Tiphareth`);
-    console.log(`   ${moon('☽ MOO')}     Emotions, instincts, the unconscious, mother`);
-    console.log(`             ${chalk.dim('Rules:')} ${moon('Can')}  ${chalk.dim('Sephira:')} Yesod`);
-    console.log(`   ${mercury('☿ MER')}     Mind, communication, learning, commerce`);
-    console.log(`             ${chalk.dim('Rules:')} ${mercury('Gem, Vir')}  ${chalk.dim('Sephira:')} Hod`);
-    console.log(`   ${venus('♀ VEN')}     Love, beauty, values, attraction, harmony`);
-    console.log(`             ${chalk.dim('Rules:')} ${venus('Tau, Lib')}  ${chalk.dim('Sephira:')} Netzach`);
-    console.log(`   ${mars('♂ MAR')}     Action, desire, aggression, courage, drive`);
-    console.log(`             ${chalk.dim('Rules:')} ${mars('Ari')}  ${chalk.dim('Sephira:')} Geburah`);
-    console.log(`   ${jupiter('♃ JUP')}     Expansion, luck, wisdom, abundance, faith`);
-    console.log(`             ${chalk.dim('Rules:')} ${jupiter('Sag')}  ${chalk.dim('Sephira:')} Chesed`);
-    console.log(`   ${saturn('♄ SAT')}     Structure, limits, time, karma, discipline`);
-    console.log(`             ${chalk.dim('Rules:')} ${saturn('Cap')}  ${chalk.dim('Sephira:')} Binah`);
-    console.log(`   ${uranus('♅ URA')}     Revolution, awakening, innovation, freedom`);
-    console.log(`             ${chalk.dim('Rules:')} ${uranus('Aqu')}  ${chalk.dim('Sephira:')} Chokmah`);
-    console.log(`   ${neptune('♆ NEP')}     Dreams, illusion, spirituality, dissolution`);
-    console.log(`             ${chalk.dim('Rules:')} ${neptune('Pis')}`);
-    console.log(`   ${pluto('♇ PLU')}     Transformation, death/rebirth, power, shadow`);
-    console.log(`             ${chalk.dim('Rules:')} ${pluto('Sco')}`);
+    console.log(`   ${sun('☉ Sun')}       Identity, vitality, ego, life force`);
+    console.log(`               ${chalk.dim('Rules:')} ${sun('Leo')}  ${chalk.dim('Sephira:')} Tiphareth`);
+    console.log(`   ${moon('☽ Moon')}      Emotions, instincts, the unconscious, mother`);
+    console.log(`               ${chalk.dim('Rules:')} ${moon('Cancer')}  ${chalk.dim('Sephira:')} Yesod`);
+    console.log(`   ${mercury('☿ Mercury')}   Mind, communication, learning, commerce`);
+    console.log(`               ${chalk.dim('Rules:')} ${mercury('Gemini, Virgo')}  ${chalk.dim('Sephira:')} Hod`);
+    console.log(`   ${venus('♀ Venus')}     Love, beauty, values, attraction, harmony`);
+    console.log(`               ${chalk.dim('Rules:')} ${venus('Taurus, Libra')}  ${chalk.dim('Sephira:')} Netzach`);
+    console.log(`   ${mars('♂ Mars')}      Action, desire, aggression, courage, drive`);
+    console.log(`               ${chalk.dim('Rules:')} ${mars('Aries')}  ${chalk.dim('Sephira:')} Geburah`);
+    console.log(`   ${jupiter('♃ Jupiter')}   Expansion, luck, wisdom, abundance, faith`);
+    console.log(`               ${chalk.dim('Rules:')} ${jupiter('Sagittarius')}  ${chalk.dim('Sephira:')} Chesed`);
+    console.log(`   ${saturn('♄ Saturn')}    Structure, limits, time, karma, discipline`);
+    console.log(`               ${chalk.dim('Rules:')} ${saturn('Capricorn')}  ${chalk.dim('Sephira:')} Binah`);
+    console.log(`   ${uranus('♅ Uranus')}    Revolution, awakening, innovation, freedom`);
+    console.log(`               ${chalk.dim('Rules:')} ${uranus('Aquarius')}  ${chalk.dim('Sephira:')} Chokmah`);
+    console.log(`   ${neptune('♆ Neptune')}   Dreams, illusion, spirituality, dissolution`);
+    console.log(`               ${chalk.dim('Rules:')} ${neptune('Pisces')}`);
+    console.log(`   ${pluto('♇ Pluto')}     Transformation, death/rebirth, power, shadow`);
+    console.log(`               ${chalk.dim('Rules:')} ${pluto('Scorpio')}`);
     console.log('');
     
     // ═══════════════════════════════════════════════════════════════
     // POINTS
     // ═══════════════════════════════════════════════════════════════
     console.log(chalk.bold.cyan('══ POINTS ══'));
-    console.log(`   ${chiron('⚷ CHI')}     The wounded healer. Core wound & gift of healing.`);
-    console.log(`   ${lilith('⚸ LIL')}     Black Moon. Primal feminine, shadow, rejection.`);
-    console.log(`   ${northNode('☊ NN')}      North Node. Soul's direction. Growth edge.`);
-    console.log(`   ${southNode('☋ SN')}      South Node. Past life gifts. Comfort zone.`);
+    console.log(`   ${chiron('⚷ Chiron')}      The wounded healer. Core wound & gift of healing.`);
+    console.log(`   ${lilith('⚸ Lilith')}      Black Moon. Primal feminine, shadow, rejection.`);
+    console.log(`   ${northNode('☊ North Node')}  Soul's direction. Growth edge. Future karma.`);
+    console.log(`   ${southNode('☋ South Node')}  Past life gifts. Comfort zone. Past karma.`);
     console.log('');
     
     // ═══════════════════════════════════════════════════════════════
     // ZODIAC SIGNS
     // ═══════════════════════════════════════════════════════════════
     console.log(chalk.bold.cyan('══ ZODIAC SIGNS ══'));
-    console.log(`   ${mars('♈ Ari')}  Aries      ${chalk.dim('Cardinal Fire')}   Initiative, courage, impatience`);
-    console.log(`                      ${chalk.dim('Ruler:')} ${mars('♂')}  ${chalk.dim('I AM')}`);
-    console.log(`   ${venus('♉ Tau')}  Taurus     ${chalk.dim('Fixed Earth')}     Stability, sensuality, stubborn`);
-    console.log(`                      ${chalk.dim('Ruler:')} ${venus('♀')}  ${chalk.dim('I HAVE')}`);
-    console.log(`   ${mercury('♊ Gem')}  Gemini     ${chalk.dim('Mutable Air')}     Curiosity, duality, scattered`);
-    console.log(`                      ${chalk.dim('Ruler:')} ${mercury('☿')}  ${chalk.dim('I THINK')}`);
-    console.log(`   ${moon('♋ Can')}  Cancer     ${chalk.dim('Cardinal Water')}  Nurturing, protective, moody`);
-    console.log(`                      ${chalk.dim('Ruler:')} ${moon('☽')}  ${chalk.dim('I FEEL')}`);
-    console.log(`   ${sun('♌ Leo')}  Leo        ${chalk.dim('Fixed Fire')}      Creative, proud, dramatic`);
-    console.log(`                      ${chalk.dim('Ruler:')} ${sun('☉')}  ${chalk.dim('I WILL')}`);
-    console.log(`   ${mercury('♍ Vir')}  Virgo      ${chalk.dim('Mutable Earth')}   Analytical, service, critical`);
-    console.log(`                      ${chalk.dim('Ruler:')} ${mercury('☿')}  ${chalk.dim('I ANALYZE')}`);
-    console.log(`   ${venus('♎ Lib')}  Libra      ${chalk.dim('Cardinal Air')}    Balance, partnership, indecisive`);
-    console.log(`                      ${chalk.dim('Ruler:')} ${venus('♀')}  ${chalk.dim('I BALANCE')}`);
-    console.log(`   ${pluto('♏ Sco')}  Scorpio    ${chalk.dim('Fixed Water')}     Intensity, depth, secretive`);
-    console.log(`                      ${chalk.dim('Ruler:')} ${pluto('♇')}  ${chalk.dim('I DESIRE')}`);
-    console.log(`   ${jupiter('♐ Sag')}  Sagittarius ${chalk.dim('Mutable Fire')}   Adventure, truth, reckless`);
-    console.log(`                      ${chalk.dim('Ruler:')} ${jupiter('♃')}  ${chalk.dim('I SEE')}`);
-    console.log(`   ${saturn('♑ Cap')}  Capricorn  ${chalk.dim('Cardinal Earth')}  Ambition, mastery, cold`);
-    console.log(`                      ${chalk.dim('Ruler:')} ${saturn('♄')}  ${chalk.dim('I USE')}`);
-    console.log(`   ${uranus('♒ Aqu')}  Aquarius   ${chalk.dim('Fixed Air')}       Humanitarian, eccentric, detached`);
-    console.log(`                      ${chalk.dim('Ruler:')} ${uranus('♅')}  ${chalk.dim('I KNOW')}`);
-    console.log(`   ${neptune('♓ Pis')}  Pisces     ${chalk.dim('Mutable Water')}   Compassion, dreams, escapist`);
-    console.log(`                      ${chalk.dim('Ruler:')} ${neptune('♆')}  ${chalk.dim('I BELIEVE')}`);
+    console.log(`   ${mars('♈ Aries')}        ${chalk.dim('Cardinal Fire')}   Initiative, courage, impatience`);
+    console.log(`                    ${chalk.dim('Ruler:')} ${mars('Mars')}  ${chalk.dim('"I AM"')}`);
+    console.log(`   ${venus('♉ Taurus')}       ${chalk.dim('Fixed Earth')}     Stability, sensuality, stubborn`);
+    console.log(`                    ${chalk.dim('Ruler:')} ${venus('Venus')}  ${chalk.dim('"I HAVE"')}`);
+    console.log(`   ${mercury('♊ Gemini')}       ${chalk.dim('Mutable Air')}     Curiosity, duality, scattered`);
+    console.log(`                    ${chalk.dim('Ruler:')} ${mercury('Mercury')}  ${chalk.dim('"I THINK"')}`);
+    console.log(`   ${moon('♋ Cancer')}       ${chalk.dim('Cardinal Water')}  Nurturing, protective, moody`);
+    console.log(`                    ${chalk.dim('Ruler:')} ${moon('Moon')}  ${chalk.dim('"I FEEL"')}`);
+    console.log(`   ${sun('♌ Leo')}          ${chalk.dim('Fixed Fire')}      Creative, proud, dramatic`);
+    console.log(`                    ${chalk.dim('Ruler:')} ${sun('Sun')}  ${chalk.dim('"I WILL"')}`);
+    console.log(`   ${mercury('♍ Virgo')}        ${chalk.dim('Mutable Earth')}   Analytical, service, critical`);
+    console.log(`                    ${chalk.dim('Ruler:')} ${mercury('Mercury')}  ${chalk.dim('"I ANALYZE"')}`);
+    console.log(`   ${venus('♎ Libra')}        ${chalk.dim('Cardinal Air')}    Balance, partnership, indecisive`);
+    console.log(`                    ${chalk.dim('Ruler:')} ${venus('Venus')}  ${chalk.dim('"I BALANCE"')}`);
+    console.log(`   ${pluto('♏ Scorpio')}      ${chalk.dim('Fixed Water')}     Intensity, depth, secretive`);
+    console.log(`                    ${chalk.dim('Ruler:')} ${pluto('Pluto')}  ${chalk.dim('"I DESIRE"')}`);
+    console.log(`   ${jupiter('♐ Sagittarius')}  ${chalk.dim('Mutable Fire')}    Adventure, truth, reckless`);
+    console.log(`                    ${chalk.dim('Ruler:')} ${jupiter('Jupiter')}  ${chalk.dim('"I SEE"')}`);
+    console.log(`   ${saturn('♑ Capricorn')}    ${chalk.dim('Cardinal Earth')}  Ambition, mastery, cold`);
+    console.log(`                    ${chalk.dim('Ruler:')} ${saturn('Saturn')}  ${chalk.dim('"I USE"')}`);
+    console.log(`   ${uranus('♒ Aquarius')}     ${chalk.dim('Fixed Air')}       Humanitarian, eccentric, detached`);
+    console.log(`                    ${chalk.dim('Ruler:')} ${uranus('Uranus')}  ${chalk.dim('"I KNOW"')}`);
+    console.log(`   ${neptune('♓ Pisces')}       ${chalk.dim('Mutable Water')}   Compassion, dreams, escapist`);
+    console.log(`                    ${chalk.dim('Ruler:')} ${neptune('Neptune')}  ${chalk.dim('"I BELIEVE"')}`);
     console.log('');
     
     // ═══════════════════════════════════════════════════════════════
     // HOUSES
     // ═══════════════════════════════════════════════════════════════
     console.log(chalk.bold.cyan('══ HOUSES ══'));
-    console.log(`   ${chalk.bold('1H')}  ${mars('ASC')}   Self, identity, appearance, first impressions`);
-    console.log(`   ${chalk.bold('2H')}        Money, possessions, values, self-worth`);
-    console.log(`   ${chalk.bold('3H')}        Communication, siblings, local travel, learning`);
-    console.log(`   ${chalk.bold('4H')}  ${saturn('IC')}    Home, family, roots, private self, mother`);
-    console.log(`   ${chalk.bold('5H')}        Creativity, romance, children, pleasure, play`);
-    console.log(`   ${chalk.bold('6H')}        Health, work, service, daily routines, pets`);
-    console.log(`   ${chalk.bold('7H')}  ${chalk.white('DSC')}   Partnerships, marriage, open enemies, others`);
-    console.log(`   ${chalk.bold('8H')}        Death, sex, shared resources, transformation`);
-    console.log(`   ${chalk.bold('9H')}        Philosophy, travel, higher education, beliefs`);
-    console.log(`   ${chalk.bold('10H')} ${sun('MC')}    Career, reputation, public self, father`);
-    console.log(`   ${chalk.bold('11H')}       Friends, groups, hopes, wishes, humanity`);
-    console.log(`   ${chalk.bold('12H')}       Unconscious, isolation, secrets, karma, dreams`);
+    console.log(`   ${chalk.bold('1st House')}   ${mars('Ascendant')}   Self, identity, appearance, first impressions`);
+    console.log(`   ${chalk.bold('2nd House')}               Money, possessions, values, self-worth`);
+    console.log(`   ${chalk.bold('3rd House')}               Communication, siblings, short travel, learning`);
+    console.log(`   ${chalk.bold('4th House')}   ${saturn('IC')}          Home, family, roots, private self, mother`);
+    console.log(`   ${chalk.bold('5th House')}               Creativity, romance, children, pleasure, play`);
+    console.log(`   ${chalk.bold('6th House')}               Health, work, service, daily routines, pets`);
+    console.log(`   ${chalk.bold('7th House')}   ${chalk.white('Descendant')}  Partnerships, marriage, open enemies, others`);
+    console.log(`   ${chalk.bold('8th House')}               Death, sex, shared resources, transformation`);
+    console.log(`   ${chalk.bold('9th House')}               Philosophy, long travel, higher education, beliefs`);
+    console.log(`   ${chalk.bold('10th House')}  ${sun('MC')}          Career, reputation, public self, father`);
+    console.log(`   ${chalk.bold('11th House')}              Friends, groups, hopes, wishes, humanity`);
+    console.log(`   ${chalk.bold('12th House')}              Unconscious, isolation, secrets, karma, dreams`);
     console.log('');
     
     // ═══════════════════════════════════════════════════════════════
     // ASPECTS
     // ═══════════════════════════════════════════════════════════════
     console.log(chalk.bold.cyan('══ ASPECTS ══'));
-    console.log(`   ${sun('☌ CNJ')}  Conjunction   0°   Fusion, intensification, new cycle`);
-    console.log(`                         ${chalk.dim('Sephira: Tiphareth (☉) — creative union')}`);
-    console.log(`   ${moon('☍ OPP')}  Opposition  180°   Awareness, tension, projection`);
-    console.log(`                         ${chalk.dim('Sephira: Yesod (☽) — polarity, reflection')}`);
-    console.log(`   ${jupiter('△ TRI')}  Trine       120°   Harmony, ease, natural talent`);
-    console.log(`                         ${chalk.dim('Sephira: Chesed (♃) — grace, flow')}`);
-    console.log(`   ${mars('□ SQR')}  Square       90°   Friction, challenge, forced growth`);
-    console.log(`                         ${chalk.dim('Sephira: Geburah (♂) — strength through struggle')}`);
-    console.log(`   ${venus('⚹ SXT')}  Sextile      60°   Opportunity, cooperation, ease`);
-    console.log(`                         ${chalk.dim('Sephira: Netzach (♀) — gentle harmony')}`);
-    console.log(`   ${mercury('⍟ QNT')}  Quintile     72°   Creativity, talent, genius`);
-    console.log(`                         ${chalk.dim('Sephira: Hod (☿) — mental brilliance')}`);
-    console.log(`   ${uranus('⚻ QCX')}  Quincunx    150°   Adjustment, awkwardness, recalibration`);
+    console.log(`   ${sun('☌ Conjunction')}    0°   Fusion, intensification, new cycle`);
+    console.log(`                       ${chalk.dim('Sephira: Tiphareth (Sun) — creative union')}`);
+    console.log(`   ${moon('☍ Opposition')}   180°   Awareness, tension, projection`);
+    console.log(`                       ${chalk.dim('Sephira: Yesod (Moon) — polarity, reflection')}`);
+    console.log(`   ${jupiter('△ Trine')}        120°   Harmony, ease, natural talent`);
+    console.log(`                       ${chalk.dim('Sephira: Chesed (Jupiter) — grace, flow')}`);
+    console.log(`   ${mars('□ Square')}        90°   Friction, challenge, forced growth`);
+    console.log(`                       ${chalk.dim('Sephira: Geburah (Mars) — strength through struggle')}`);
+    console.log(`   ${venus('⚹ Sextile')}       60°   Opportunity, cooperation, ease`);
+    console.log(`                       ${chalk.dim('Sephira: Netzach (Venus) — gentle harmony')}`);
+    console.log(`   ${mercury('⍟ Quintile')}      72°   Creativity, talent, genius`);
+    console.log(`                       ${chalk.dim('Sephira: Hod (Mercury) — mental brilliance')}`);
+    console.log(`   ${uranus('⚻ Quincunx')}     150°   Adjustment, awkwardness, recalibration`);
     console.log('');
     
     // ═══════════════════════════════════════════════════════════════
     // ELEMENTS
     // ═══════════════════════════════════════════════════════════════
     console.log(chalk.bold.cyan('══ ELEMENTS ══'));
-    console.log(`   ${mars('🜂 FIRE')}    ${mars('Ari Leo Sag')}    Spirit, will, action, enthusiasm`);
-    console.log(`             ${chalk.dim('Hot & Dry — Choleric — Intuitive')}`);
-    console.log(`   ${venus('🜃 EARTH')}   ${venus('Tau Vir Cap')}    Matter, stability, practicality`);
-    console.log(`             ${chalk.dim('Cold & Dry — Melancholic — Sensation')}`);
-    console.log(`   ${mercury('🜁 AIR')}     ${mercury('Gem Lib Aqu')}    Mind, communication, connection`);
-    console.log(`             ${chalk.dim('Hot & Wet — Sanguine — Thinking')}`);
-    console.log(`   ${jupiter('🜄 WATER')}   ${moon('Can Sco Pis')}    Emotion, intuition, the unconscious`);
-    console.log(`             ${chalk.dim('Cold & Wet — Phlegmatic — Feeling')}`);
+    console.log(`   ${mars('🜂 Fire')}     ${mars('Aries, Leo, Sagittarius')}`);
+    console.log(`             Spirit, will, action, enthusiasm`);
+    console.log(`             ${chalk.dim('Hot & Dry — Choleric — Intuitive function')}`);
+    console.log(`   ${venus('🜃 Earth')}    ${venus('Taurus, Virgo, Capricorn')}`);
+    console.log(`             Matter, stability, practicality, form`);
+    console.log(`             ${chalk.dim('Cold & Dry — Melancholic — Sensation function')}`);
+    console.log(`   ${mercury('🜁 Air')}      ${mercury('Gemini, Libra, Aquarius')}`);
+    console.log(`             Mind, communication, connection, ideas`);
+    console.log(`             ${chalk.dim('Hot & Wet — Sanguine — Thinking function')}`);
+    console.log(`   ${jupiter('🜄 Water')}    ${moon('Cancer, Scorpio, Pisces')}`);
+    console.log(`             Emotion, intuition, the unconscious, soul`);
+    console.log(`             ${chalk.dim('Cold & Wet — Phlegmatic — Feeling function')}`);
     console.log('');
     
     // ═══════════════════════════════════════════════════════════════
     // MODALITIES
     // ═══════════════════════════════════════════════════════════════
     console.log(chalk.bold.cyan('══ MODALITIES ══'));
-    console.log(`   ${chalk.bold('CARDINAL')}   ${mars('Ari')} ${moon('Can')} ${venus('Lib')} ${saturn('Cap')}    Initiating, leadership, action`);
+    console.log(`   ${chalk.bold('Cardinal')}   ${mars('Aries')}, ${moon('Cancer')}, ${venus('Libra')}, ${saturn('Capricorn')}`);
+    console.log(`             Initiating, leadership, action`);
     console.log(`             ${chalk.dim('The spark. Begins seasons. "I start."')}`);
-    console.log(`   ${chalk.bold('FIXED')}      ${venus('Tau')} ${sun('Leo')} ${pluto('Sco')} ${uranus('Aqu')}    Stabilizing, persistence, stubborn`);
+    console.log(`   ${chalk.bold('Fixed')}      ${venus('Taurus')}, ${sun('Leo')}, ${pluto('Scorpio')}, ${uranus('Aquarius')}`);
+    console.log(`             Stabilizing, persistence, stubborn`);
     console.log(`             ${chalk.dim('The sustainer. Mid-season. "I maintain."')}`);
-    console.log(`   ${chalk.bold('MUTABLE')}    ${mercury('Gem')} ${mercury('Vir')} ${jupiter('Sag')} ${neptune('Pis')}    Adapting, flexible, changeable`);
+    console.log(`   ${chalk.bold('Mutable')}    ${mercury('Gemini')}, ${mercury('Virgo')}, ${jupiter('Sagittarius')}, ${neptune('Pisces')}`);
+    console.log(`             Adapting, flexible, changeable`);
     console.log(`             ${chalk.dim('The dissolver. End of season. "I change."')}`);
     console.log('');
     
