@@ -1,6 +1,6 @@
 {
   "name": "thoth-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "𓅝 Astrological calculations from the command line. Swiss Ephemeris precision. Built for humans and agents.",
   "author": "AKLO <aklo@aklolabs.com>",
   "license": "MIT",
@@ -45,6 +45,6 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/aklo/thoth-cli.git"
+    "url": "https://github.com/aklo360/thoth-cli.git"
   }
 }
