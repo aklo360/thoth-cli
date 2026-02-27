@@ -364,7 +364,7 @@ export function formatTransits(result: TransitResult): string {
       
       // Format: sym NAME aspect sym NAME | orb | houses
       const orb = aspect.orb.toFixed(2).padStart(5);
-      lines.push(`   ${chalk.cyan(tSym)} ${tName.padEnd(3)} ${aspectColor(aSym)} ${aspectShort} ${chalk.magenta(nSym)} ${nName.padEnd(3)}  ${chalk.dim(orb + '°')}  ${chalk.dim(houses)}`);
+      lines.push(`   ${chalk.cyan(tSym)} ${tName.padEnd(3)} ${aspectColor(aSym + ' ' + aspectShort)} ${chalk.magenta(nSym)} ${nName.padEnd(3)}  ${chalk.dim(orb + '°')}  ${chalk.dim(houses)}`);
     }
   }
   
