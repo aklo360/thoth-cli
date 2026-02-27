@@ -92,4 +92,10 @@ thoth-cli/
 
 ---
 
+### License
+
+PolyForm Noncommercial 1.0.0 — Free for non-commercial use. Commercial use requires a separate license.
+
+---
+
 *"As above, so below; as below, so above."* — The Emerald Tablet

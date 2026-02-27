@@ -284,7 +284,14 @@ node dist/bin.js chart --date 1879-03-14 --time 11:30 --city "Ulm" --nation "DE"
 
 ## License
 
-MIT
+**PolyForm Noncommercial 1.0.0**
+
+- ✅ Free for personal use
+- ✅ Free for research, education, and non-profits
+- ✅ Free to modify and share (non-commercially)
+- ❌ **Commercial use requires a separate license**
+
+For commercial licensing, contact: https://github.com/aklo360
 
 ---
 

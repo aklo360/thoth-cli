@@ -18,4 +18,4 @@ thoth key
 
 ## License
 
-MIT
+PolyForm Noncommercial 1.0.0 — Free for non-commercial use. Commercial use requires a separate license.
