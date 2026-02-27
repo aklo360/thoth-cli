@@ -89,11 +89,11 @@ export function getCommand(): { command: string; args: string[] } {
   const binaryPath = getBinaryPath();
   
   if (binaryPath === 'python') {
-    // Development fallback: run Python module directly
-    // Use 'python' or 'python3' from PATH (works with virtualenv)
+    // Fallback: use thoth-core CLI (installed via uv tool install or pipx)
+    // This is the recommended way for end users
     return {
-      command: 'python3',
-      args: ['-m', 'thoth_core.cli'],
+      command: 'thoth-core',
+      args: [],
     };
   }
   
