@@ -295,7 +295,7 @@ export function formatTransits(result: TransitResult): string {
         // Houses: current → natal (compact)
         const cH = planet.house ? planet.house.replace(/ house/i, '').replace(/first/i, '1').replace(/second/i, '2').replace(/third/i, '3').replace(/fourth/i, '4').replace(/fifth/i, '5').replace(/sixth/i, '6').replace(/seventh/i, '7').replace(/eighth/i, '8').replace(/ninth/i, '9').replace(/tenth/i, '10').replace(/eleventh/i, '11').replace(/twelfth/i, '12') : '?';
         const nH = planet.natal_house || '?';
-        lines.push(`   ${chalk.yellow(symbol)}  ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)} ${rx} ${chalk.dim(`${cH}H → ${nH}H`)}`);
+        lines.push(`   ${chalk.yellow(symbol)}  ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)} ${rx} ${chalk.dim(`${cH}H→${nH}H`)}`);
       }
     }
     lines.push('');
@@ -346,10 +346,10 @@ export function formatTransits(result: TransitResult): string {
                          aspect.aspect === 'square' ? chalk.red :
                          aspect.aspect === 'sextile' ? chalk.blue : chalk.white;
       
-      // Houses: transit → natal
+      // Houses: transit → natal (with H notation)
       const tH = (aspect as any).transit_house;
       const nH = (aspect as any).natal_house;
-      const houses = `${tH || '?'}→${nH || '?'}`;
+      const houses = `${tH || '?'}H→${nH || '?'}H`;
       
       // Format: transit_sym aspect_sym natal_sym | aspect_short | orb | houses
       // Columns: symbol(2) symbol(2) symbol(2) | name(3) | orb(5) | houses(5)
