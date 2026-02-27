@@ -218,80 +218,96 @@ program
     console.log(chalk.cyan(`thoth-core v${result.version}`));
   });
 
-// Key command - symbol reference
+// Key command - symbol reference with Kabbalistic colors
 program
   .command('key')
   .description('Symbol reference guide')
   .action(() => {
+    // Planetary colors (Sephirotic correspondences)
+    const sun = chalk.hex('#FFD700');      // Gold - Tiphareth
+    const moon = chalk.hex('#C0C0C0');     // Silver - Yesod
+    const mercury = chalk.hex('#FF8C00');  // Orange - Hod
+    const venus = chalk.hex('#00FF7F');    // Green - Netzach
+    const mars = chalk.hex('#FF0000');     // Red - Geburah
+    const jupiter = chalk.hex('#4169E1');  // Royal Blue - Chesed
+    const saturn = chalk.hex('#4B0082');   // Indigo - Binah
+    const uranus = chalk.hex('#00FFFF');   // Electric Cyan - Chokmah
+    const neptune = chalk.hex('#20B2AA');  // Sea Green
+    const pluto = chalk.hex('#8B0000');    // Dark Red - transformation
+    const chiron = chalk.hex('#9932CC');   // Purple - wounded healer
+    const lilith = chalk.hex('#800020');   // Burgundy - primal
+    const northNode = chalk.hex('#FFD700'); // Gold - future
+    const southNode = chalk.hex('#C0C0C0'); // Silver - past
+    
     console.log(chalk.bold.white('\n𓅝 THOTH KEY — Symbol Reference\n'));
     
-    // Zodiac Signs
+    // Zodiac Signs (colored by ruling planet)
     console.log(chalk.bold.cyan('── ZODIAC SIGNS ──'));
-    console.log('   ♈ Ari  Aries        ♎ Lib  Libra');
-    console.log('   ♉ Tau  Taurus       ♏ Sco  Scorpio');
-    console.log('   ♊ Gem  Gemini       ♐ Sag  Sagittarius');
-    console.log('   ♋ Can  Cancer       ♑ Cap  Capricorn');
-    console.log('   ♌ Leo  Leo          ♒ Aqu  Aquarius');
-    console.log('   ♍ Vir  Virgo        ♓ Pis  Pisces');
+    console.log(`   ${mars('♈ Ari')}  Aries        ${venus('♎ Lib')}  Libra`);
+    console.log(`   ${venus('♉ Tau')}  Taurus       ${pluto('♏ Sco')}  Scorpio`);
+    console.log(`   ${mercury('♊ Gem')}  Gemini       ${jupiter('♐ Sag')}  Sagittarius`);
+    console.log(`   ${moon('♋ Can')}  Cancer       ${saturn('♑ Cap')}  Capricorn`);
+    console.log(`   ${sun('♌ Leo')}  Leo          ${uranus('♒ Aqu')}  Aquarius`);
+    console.log(`   ${mercury('♍ Vir')}  Virgo        ${neptune('♓ Pis')}  Pisces`);
     console.log('');
     
-    // Planets
+    // Planets (Sephirotic colors)
     console.log(chalk.bold.cyan('── PLANETS ──'));
-    console.log('   ☉ SUN  Sun          ♄ SAT  Saturn');
-    console.log('   ☽ MOO  Moon         ♅ URA  Uranus');
-    console.log('   ☿ MER  Mercury      ♆ NEP  Neptune');
-    console.log('   ♀ VEN  Venus        ♇ PLU  Pluto');
-    console.log('   ♂ MAR  Mars');
-    console.log('   ♃ JUP  Jupiter');
+    console.log(`   ${sun('☉ SUN')}  Sun ${chalk.dim('Tiphareth')}     ${saturn('♄ SAT')}  Saturn ${chalk.dim('Binah')}`);
+    console.log(`   ${moon('☽ MOO')}  Moon ${chalk.dim('Yesod')}       ${uranus('♅ URA')}  Uranus ${chalk.dim('Chokmah')}`);
+    console.log(`   ${mercury('☿ MER')}  Mercury ${chalk.dim('Hod')}     ${neptune('♆ NEP')}  Neptune`);
+    console.log(`   ${venus('♀ VEN')}  Venus ${chalk.dim('Netzach')}    ${pluto('♇ PLU')}  Pluto`);
+    console.log(`   ${mars('♂ MAR')}  Mars ${chalk.dim('Geburah')}`);
+    console.log(`   ${jupiter('♃ JUP')}  Jupiter ${chalk.dim('Chesed')}`);
     console.log('');
     
     // Points
     console.log(chalk.bold.cyan('── POINTS ──'));
-    console.log('   ⚷ CHI  Chiron       Wounded healer');
-    console.log('   ⚸ LIL  Lilith       Black Moon (primal/hidden)');
-    console.log('   ☊ NN   North Node   Karmic direction');
-    console.log('   ☋ SN   South Node   Karmic past');
+    console.log(`   ${chiron('⚷ CHI')}  Chiron       ${chalk.dim('Wounded healer')}`);
+    console.log(`   ${lilith('⚸ LIL')}  Lilith       ${chalk.dim('Black Moon, primal shadow')}`);
+    console.log(`   ${northNode('☊ NN')}   North Node   ${chalk.dim('Karmic direction')}`);
+    console.log(`   ${southNode('☋ SN')}   South Node   ${chalk.dim('Karmic past')}`);
     console.log('');
     
     // Angles
     console.log(chalk.bold.cyan('── ANGLES ──'));
-    console.log('   ASC    Ascendant    Rising sign (1H cusp)');
-    console.log('   IC     Imum Coeli   Roots, foundation (4H cusp)');
-    console.log('   DSC    Descendant   Partnerships (7H cusp)');
-    console.log('   MC     Medium Coeli Public self, career (10H cusp)');
+    console.log(`   ${chalk.white('ASC')}    Ascendant    ${chalk.dim('Rising sign (1H cusp)')}`);
+    console.log(`   ${saturn('IC')}     Imum Coeli   ${chalk.dim('Roots, foundation (4H cusp)')}`);
+    console.log(`   ${chalk.white('DSC')}    Descendant   ${chalk.dim('Partnerships (7H cusp)')}`);
+    console.log(`   ${sun('MC')}     Medium Coeli ${chalk.dim('Public self (10H cusp)')}`);
     console.log('');
     
-    // Aspects with Hermetic colors
+    // Aspects (Sephirotic colors)
     console.log(chalk.bold.cyan('── ASPECTS ──'));
-    console.log(`   ${chalk.yellow('☌ CNJ')}  Conjunction   0°   Union, fusion ${chalk.dim('(Tiphareth/☉)')}`);
-    console.log(`   ${chalk.magenta('☍ OPP')}  Opposition  180°   Polarity, awareness ${chalk.dim('(Yesod/☽)')}`);
-    console.log(`   ${chalk.blue('△ TRI')}  Trine       120°   Grace, flow ${chalk.dim('(Chesed/♃)')}`);
-    console.log(`   ${chalk.red('□ SQR')}  Square       90°   Challenge, growth ${chalk.dim('(Geburah/♂)')}`);
-    console.log(`   ${chalk.green('⚹ SXT')}  Sextile      60°   Opportunity ${chalk.dim('(Netzach/♀)')}`);
-    console.log(`   ${chalk.hex('#FF8C00')('⍟ QNT')}  Quintile     72°   Genius, creativity ${chalk.dim('(Hod/☿)')}`);
-    console.log(`   ${chalk.cyan('⚻ QCX')}  Quincunx    150°   Adjustment, tension`);
+    console.log(`   ${sun('☌ CNJ')}  Conjunction   0°   ${chalk.dim('Union, fusion')} ${chalk.dim('(Tiphareth/☉)')}`);
+    console.log(`   ${moon('☍ OPP')}  Opposition  180°   ${chalk.dim('Polarity, awareness')} ${chalk.dim('(Yesod/☽)')}`);
+    console.log(`   ${jupiter('△ TRI')}  Trine       120°   ${chalk.dim('Grace, flow')} ${chalk.dim('(Chesed/♃)')}`);
+    console.log(`   ${mars('□ SQR')}  Square       90°   ${chalk.dim('Challenge, growth')} ${chalk.dim('(Geburah/♂)')}`);
+    console.log(`   ${venus('⚹ SXT')}  Sextile      60°   ${chalk.dim('Opportunity')} ${chalk.dim('(Netzach/♀)')}`);
+    console.log(`   ${mercury('⍟ QNT')}  Quintile     72°   ${chalk.dim('Genius, creativity')} ${chalk.dim('(Hod/☿)')}`);
+    console.log(`   ${uranus('⚻ QCX')}  Quincunx    150°   ${chalk.dim('Adjustment, tension')}`);
     console.log('');
     
     // Elements
     console.log(chalk.bold.cyan('── ELEMENTS ──'));
-    console.log(`   ${chalk.red('🜂 Fire')}    Aries, Leo, Sagittarius      ${chalk.dim('Spirit, will, action')}`);
-    console.log(`   ${chalk.green('🜃 Earth')}   Taurus, Virgo, Capricorn     ${chalk.dim('Matter, form, stability')}`);
-    console.log(`   ${chalk.cyan('🜁 Air')}     Gemini, Libra, Aquarius      ${chalk.dim('Mind, communication')}`);
-    console.log(`   ${chalk.blue('🜄 Water')}   Cancer, Scorpio, Pisces      ${chalk.dim('Emotion, intuition')}`);
+    console.log(`   ${mars('🜂 Fire')}    ${mars('Ari, Leo, Sag')}     ${chalk.dim('Spirit, will, action')}`);
+    console.log(`   ${venus('🜃 Earth')}   ${venus('Tau, Vir, Cap')}     ${chalk.dim('Matter, form, stability')}`);
+    console.log(`   ${mercury('🜁 Air')}     ${mercury('Gem, Lib, Aqu')}     ${chalk.dim('Mind, communication')}`);
+    console.log(`   ${jupiter('🜄 Water')}   ${moon('Can, Sco, Pis')}     ${chalk.dim('Emotion, intuition')}`);
     console.log('');
     
     // Modalities
     console.log(chalk.bold.cyan('── MODALITIES ──'));
-    console.log('   Cardinal   Initiating    Ari, Can, Lib, Cap');
-    console.log('   Fixed      Stabilizing   Tau, Leo, Sco, Aqu');
-    console.log('   Mutable    Adapting      Gem, Vir, Sag, Pis');
+    console.log(`   ${chalk.bold('Cardinal')}   Initiating    ${mars('Ari')}, ${moon('Can')}, ${venus('Lib')}, ${saturn('Cap')}`);
+    console.log(`   ${chalk.bold('Fixed')}      Stabilizing   ${venus('Tau')}, ${sun('Leo')}, ${pluto('Sco')}, ${uranus('Aqu')}`);
+    console.log(`   ${chalk.bold('Mutable')}    Adapting      ${mercury('Gem')}, ${mercury('Vir')}, ${jupiter('Sag')}, ${neptune('Pis')}`);
     console.log('');
     
     // Other symbols
     console.log(chalk.bold.cyan('── OTHER ──'));
-    console.log(`   ${chalk.red('℞')}  Retrograde    Planet appears to move backward`);
-    console.log('   H  House         e.g., 4H = Fourth House');
-    console.log('   →  Flow          e.g., 2H→4H (transit H → natal H)');
+    console.log(`   ${mars('℞')}  Retrograde    ${chalk.dim('Planet appears to move backward')}`);
+    console.log(`   H  House         ${chalk.dim('e.g., 4H = Fourth House')}`);
+    console.log(`   →  Flow          ${chalk.dim('e.g., 2H→4H (transit H → natal H)')}`);
     console.log('');
   });
 

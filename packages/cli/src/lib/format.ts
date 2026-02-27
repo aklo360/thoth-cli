@@ -4,6 +4,82 @@
  */
 
 import chalk from 'chalk';
+
+// Kabbalistic/Sephirotic color system
+const COLORS = {
+  // Planets (Sephirotic correspondences)
+  sun: chalk.hex('#FFD700'),      // Gold - Tiphareth
+  moon: chalk.hex('#C0C0C0'),     // Silver - Yesod
+  mercury: chalk.hex('#FF8C00'),  // Orange - Hod
+  venus: chalk.hex('#00FF7F'),    // Green - Netzach
+  mars: chalk.hex('#FF0000'),     // Red - Geburah
+  jupiter: chalk.hex('#4169E1'),  // Royal Blue - Chesed
+  saturn: chalk.hex('#4B0082'),   // Indigo - Binah
+  uranus: chalk.hex('#00FFFF'),   // Electric Cyan - Chokmah
+  neptune: chalk.hex('#20B2AA'),  // Sea Green
+  pluto: chalk.hex('#8B0000'),    // Dark Red
+  chiron: chalk.hex('#9932CC'),   // Purple - wounded healer
+  lilith: chalk.hex('#800020'),   // Burgundy - primal
+  northNode: chalk.hex('#FFD700'), // Gold
+  southNode: chalk.hex('#C0C0C0'), // Silver
+};
+
+// Get planet color
+function getPlanetColor(name: string): typeof chalk {
+  const colorMap: Record<string, typeof chalk> = {
+    'sun': COLORS.sun,
+    'moon': COLORS.moon,
+    'mercury': COLORS.mercury,
+    'venus': COLORS.venus,
+    'mars': COLORS.mars,
+    'jupiter': COLORS.jupiter,
+    'saturn': COLORS.saturn,
+    'uranus': COLORS.uranus,
+    'neptune': COLORS.neptune,
+    'pluto': COLORS.pluto,
+    'chiron': COLORS.chiron,
+    'mean_lilith': COLORS.lilith,
+    'lilith': COLORS.lilith,
+    'true_north_lunar_node': COLORS.northNode,
+    'true_south_lunar_node': COLORS.southNode,
+    'nn': COLORS.northNode,
+    'sn': COLORS.southNode,
+  };
+  return colorMap[name.toLowerCase()] || chalk.white;
+}
+
+// Get zodiac color (by ruling planet)
+function getZodiacColor(sign: string): typeof chalk {
+  const colorMap: Record<string, typeof chalk> = {
+    'Ari': COLORS.mars,
+    'Tau': COLORS.venus,
+    'Gem': COLORS.mercury,
+    'Can': COLORS.moon,
+    'Leo': COLORS.sun,
+    'Vir': COLORS.mercury,
+    'Lib': COLORS.venus,
+    'Sco': COLORS.pluto,
+    'Sag': COLORS.jupiter,
+    'Cap': COLORS.saturn,
+    'Aqu': COLORS.uranus,
+    'Pis': COLORS.neptune,
+  };
+  return colorMap[sign] || chalk.white;
+}
+
+// Get aspect color (Sephirotic)
+function getAspectColor(aspect: string): typeof chalk {
+  const colorMap: Record<string, typeof chalk> = {
+    'conjunction': COLORS.sun,     // Tiphareth
+    'opposition': COLORS.moon,     // Yesod  
+    'trine': COLORS.jupiter,       // Chesed
+    'square': COLORS.mars,         // Geburah
+    'sextile': COLORS.venus,       // Netzach
+    'quintile': COLORS.mercury,    // Hod
+    'quincunx': COLORS.uranus,
+  };
+  return colorMap[aspect] || chalk.white;
+}
 import type { ChartResult, TransitResult, MoonResult, EphemerisResult, Aspect } from '../types.js';
 
 // Zodiac symbols
@@ -155,12 +231,14 @@ export function formatChart(result: ChartResult): string {
   for (const name of planetOrder) {
     const planet = result.planets[name];
     if (planet) {
+      const pColor = getPlanetColor(name);
+      const zColor = getZodiacColor(planet.sign);
       const symbol = getPlanetSymbol(name);
       const zodiac = getZodiacSymbol(planet.sign);
       const deg = formatDegrees(planet.position);
-      const rx = planet.retrograde ? chalk.red(' ℞') : '';
+      const rx = planet.retrograde ? COLORS.mars(' ℞') : '';
       const house = planet.house ? chalk.dim(` (${planet.house})`) : '';
-      lines.push(`   ${chalk.yellow(symbol)} ${name.padEnd(10)} ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)}${rx}${house}`);
+      lines.push(`   ${pColor(symbol)} ${name.padEnd(10)} ${zColor(zodiac + ' ' + planet.sign)} ${chalk.white(deg)}${rx}${house}`);
     }
   }
   lines.push('');
@@ -178,12 +256,14 @@ export function formatChart(result: ChartResult): string {
   for (const name of pointOrder) {
     const planet = result.planets[name];
     if (planet) {
+      const pColor = getPlanetColor(name);
+      const zColor = getZodiacColor(planet.sign);
       const symbol = getPlanetSymbol(name);
       const displayName = pointNames[name] || name;
       const zodiac = getZodiacSymbol(planet.sign);
       const deg = formatDegrees(planet.position);
       const house = planet.house ? chalk.dim(` (${planet.house})`) : '';
-      lines.push(`   ${chalk.yellow(symbol)} ${displayName.padEnd(10)} ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)}${house}`);
+      lines.push(`   ${pColor(symbol)} ${displayName.padEnd(10)} ${zColor(zodiac + ' ' + planet.sign)} ${chalk.white(deg)}${house}`);
     }
   }
   lines.push('');
@@ -218,18 +298,16 @@ export function formatChart(result: ChartResult): string {
     lines.push(chalk.bold.cyan('── ASPECTS ──'));
     const aspects = (result as any).aspects.slice(0, 15); // Top 15
     for (const asp of aspects) {
-      const p1 = getPlanetSymbol(asp.planet1.toLowerCase().replace(/ /g, '_'));
-      const p2 = getPlanetSymbol(asp.planet2.toLowerCase().replace(/ /g, '_'));
+      const p1Name = asp.planet1.toLowerCase().replace(/ /g, '_');
+      const p2Name = asp.planet2.toLowerCase().replace(/ /g, '_');
+      const p1Color = getPlanetColor(p1Name);
+      const p2Color = getPlanetColor(p2Name);
+      const p1 = getPlanetSymbol(p1Name);
+      const p2 = getPlanetSymbol(p2Name);
       const aspectSym = getAspectSymbol(asp.aspect);
       const aspectName = asp.aspect.charAt(0).toUpperCase() + asp.aspect.slice(1);
-      // Hermetic color correspondences
-      const aspectColor = asp.aspect === 'conjunction' ? chalk.yellow :
-                         asp.aspect === 'opposition' ? chalk.magenta :
-                         asp.aspect === 'trine' ? chalk.blue :
-                         asp.aspect === 'square' ? chalk.red :
-                         asp.aspect === 'sextile' ? chalk.green :
-                         asp.aspect === 'quintile' ? chalk.hex('#FF8C00') : chalk.white;
-      lines.push(`   ${p1} ${asp.planet1.padEnd(10)} ${aspectColor(aspectSym + ' ' + aspectName.padEnd(11))} ${p2} ${asp.planet2.padEnd(10)} ${chalk.dim(`${asp.orb}°`)}`);
+      const aColor = getAspectColor(asp.aspect);
+      lines.push(`   ${p1Color(p1)} ${asp.planet1.padEnd(10)} ${aColor(aspectSym + ' ' + aspectName.padEnd(11))} ${p2Color(p2)} ${asp.planet2.padEnd(10)} ${chalk.dim(`${asp.orb}°`)}`);
     }
     lines.push('');
   }
@@ -290,12 +368,14 @@ export function formatTransits(result: TransitResult): string {
     for (const name of ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']) {
       const planet = planets[name];
       if (planet) {
+        const pColor = getPlanetColor(name);
+        const zColor = getZodiacColor(planet.sign);
         const symbol = getPlanetSymbol(name);
         const zodiac = getZodiacSymbol(planet.sign);
         const deg = formatDegrees(planet.position);
-        const rx = planet.retrograde ? chalk.red('℞') : ' ';
+        const rx = planet.retrograde ? COLORS.mars('℞') : ' ';
         const cH = planet.house ? planet.house.replace(/ house/i, '').replace(/first/i, '1').replace(/second/i, '2').replace(/third/i, '3').replace(/fourth/i, '4').replace(/fifth/i, '5').replace(/sixth/i, '6').replace(/seventh/i, '7').replace(/eighth/i, '8').replace(/ninth/i, '9').replace(/tenth/i, '10').replace(/eleventh/i, '11').replace(/twelfth/i, '12') : '?';
-        lines.push(`   ${chalk.yellow(symbol)}  ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)} ${rx} ${chalk.dim(`${cH}H`)}`);
+        lines.push(`   ${pColor(symbol)}  ${zColor(zodiac + ' ' + planet.sign)} ${chalk.white(deg)} ${rx} ${chalk.dim(`${cH}H`)}`);
       }
     }
     lines.push('');
@@ -312,11 +392,13 @@ export function formatTransits(result: TransitResult): string {
       const nH = natalHouses[String(i)];
       if (tH && nH) {
         const label = i === 1 ? 'ASC' : i === 4 ? 'IC' : i === 7 ? 'DSC' : i === 10 ? 'MC' : `${i}`.padStart(2) + 'H';
+        const tZColor = getZodiacColor(tH.sign);
+        const nZColor = getZodiacColor(nH.sign);
         const tZodiac = getZodiacSymbol(tH.sign);
         const nZodiac = getZodiacSymbol(nH.sign);
         const tDeg = formatDegrees(tH.position);
         const nDeg = formatDegrees(nH.position);
-        lines.push(`   ${chalk.yellow(label.padStart(3))}  ${tZodiac} ${tH.sign} ${chalk.dim(tDeg)}  ${nZodiac} ${nH.sign} ${chalk.dim(nDeg)}`);
+        lines.push(`   ${chalk.white(label.padStart(3))}  ${tZColor(tZodiac + ' ' + tH.sign)} ${chalk.dim(tDeg)}  ${nZColor(nZodiac + ' ' + nH.sign)} ${chalk.dim(nDeg)}`);
       }
     }
     lines.push('');
@@ -339,11 +421,16 @@ export function formatTransits(result: TransitResult): string {
     };
 
     for (const aspect of result.aspects) {
-      const tSym = getPlanetSymbol(aspect.transit_planet.toLowerCase().replace(/ /g, '_'));
-      const nSym = getPlanetSymbol(aspect.natal_planet.toLowerCase().replace(/ /g, '_'));
+      const tPlanet = aspect.transit_planet.toLowerCase().replace(/ /g, '_');
+      const nPlanet = aspect.natal_planet.toLowerCase().replace(/ /g, '_');
+      const tColor = getPlanetColor(tPlanet);
+      const nColor = getPlanetColor(nPlanet);
+      const tSym = getPlanetSymbol(tPlanet);
+      const nSym = getPlanetSymbol(nPlanet);
       const tName = shortName(aspect.transit_planet);
       const nName = shortName(aspect.natal_planet);
       const aSym = getAspectSymbol(aspect.aspect);
+      const aColor = getAspectColor(aspect.aspect);
       const aspectShort = aspect.aspect === 'conjunction' ? 'CNJ' :
                          aspect.aspect === 'opposition' ? 'OPP' :
                          aspect.aspect === 'trine' ? 'TRI' :
@@ -353,17 +440,6 @@ export function formatTransits(result: TransitResult): string {
                          aspect.aspect === 'quincunx' ? 'QCX' : 
                          String(aspect.aspect).slice(0, 3).toUpperCase();
       
-      // Hermetic color correspondences:
-      // CNJ = Yellow (Tiphareth/Sun), OPP = Magenta (Yesod/Moon), TRI = Blue (Chesed/Jupiter)
-      // SQR = Red (Geburah/Mars), SXT = Green (Netzach/Venus), QNT = Orange (Hod/Mercury)
-      const aspectColor = aspect.aspect === 'conjunction' ? chalk.yellow :
-                         aspect.aspect === 'opposition' ? chalk.magenta :
-                         aspect.aspect === 'trine' ? chalk.blue :
-                         aspect.aspect === 'square' ? chalk.red :
-                         aspect.aspect === 'sextile' ? chalk.green :
-                         aspect.aspect === 'quintile' ? chalk.hex('#FF8C00') :
-                         aspect.aspect === 'quincunx' ? chalk.cyan : chalk.white;
-      
       // Houses: transit → natal
       const tH = (aspect as any).transit_house;
       const nH = (aspect as any).natal_house;
@@ -371,7 +447,7 @@ export function formatTransits(result: TransitResult): string {
       
       // Format: sym NAME aspect sym NAME | orb | houses
       const orb = aspect.orb.toFixed(2).padStart(5);
-      lines.push(`   ${chalk.cyan(tSym)} ${tName.padEnd(3)} ${aspectColor(aSym + ' ' + aspectShort)} ${chalk.magenta(nSym)} ${nName.padEnd(3)}  ${chalk.dim(orb + '°')}  ${chalk.dim(houses)}`);
+      lines.push(`   ${tColor(tSym)} ${tName.padEnd(3)} ${aColor(aSym + ' ' + aspectShort)} ${nColor(nSym)} ${nName.padEnd(3)}  ${chalk.dim(orb + '°')}  ${chalk.dim(houses)}`);
     }
   }
   
