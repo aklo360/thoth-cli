@@ -238,28 +238,75 @@ def transit(
         from kerykeion import SynastryAspects
         synastry = SynastryAspects(transit_subj, natal)
         
+        # Build a lookup for natal planet houses
+        natal_planet_houses = {}
+        for p in ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 
+                  'uranus', 'neptune', 'pluto', 'chiron', 'mean_lilith',
+                  'true_north_lunar_node', 'true_south_lunar_node']:
+            planet = getattr(natal, p, None)
+            if planet and hasattr(planet, 'house') and planet.house:
+                # Normalize name for lookup
+                name_map = {
+                    'true_north_lunar_node': 'True_North_Lunar_Node',
+                    'true_south_lunar_node': 'True_South_Lunar_Node',
+                    'mean_lilith': 'Mean_Lilith',
+                }
+                key = name_map.get(p, p.capitalize())
+                natal_planet_houses[key] = planet.house.replace('_', ' ').title()
+        
         aspects = []
         for asp in synastry.all_aspects:
             if asp['orbit'] <= orb:
+                natal_house = natal_planet_houses.get(asp['p2_name'], None)
                 aspects.append({
                     "transit_planet": asp['p1_name'],
                     "natal_planet": asp['p2_name'],
                     "aspect": asp['aspect'],
                     "orb": round(asp['orbit'], 2),
+                    "natal_house": natal_house,
                 })
         
         # Sort by orb (tightest first)
         aspects.sort(key=lambda x: x['orb'])
         
-        # Current transiting planets
+        # Get natal house cusps for house calculations
+        natal_houses = []
+        for house_name in ['first_house', 'second_house', 'third_house', 'fourth_house',
+                          'fifth_house', 'sixth_house', 'seventh_house', 'eighth_house',
+                          'ninth_house', 'tenth_house', 'eleventh_house', 'twelfth_house']:
+            house = getattr(natal, house_name, None)
+            if house:
+                natal_houses.append(house.abs_pos)
+        
+        def get_natal_house(abs_pos):
+            """Determine which natal house a transiting planet is in"""
+            if len(natal_houses) < 12:
+                return None
+            for i in range(12):
+                next_i = (i + 1) % 12
+                cusp = natal_houses[i]
+                next_cusp = natal_houses[next_i]
+                
+                # Handle wrap around 360°
+                if next_cusp < cusp:  # Crosses 0° Aries
+                    if abs_pos >= cusp or abs_pos < next_cusp:
+                        return i + 1
+                else:
+                    if cusp <= abs_pos < next_cusp:
+                        return i + 1
+            return 1  # Default to 1st house
+        
+        # Current transiting planets with natal house positions
         transit_planets_data = {}
         for p in ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']:
             planet = getattr(transit_subj, p, None)
             if planet:
+                natal_house = get_natal_house(planet.abs_pos)
                 transit_planets_data[p] = {
                     "sign": planet.sign,
                     "position": round(planet.position, 2),
                     "retrograde": planet.retrograde if hasattr(planet, 'retrograde') else False,
+                    "natal_house": natal_house,
                 }
         
         # Current lunar phase

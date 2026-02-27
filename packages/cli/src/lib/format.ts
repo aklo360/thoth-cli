@@ -273,7 +273,7 @@ export function formatTransits(result: TransitResult): string {
   }
   lines.push('');
   
-  // Current sky positions
+  // Current sky positions with natal house
   if ((result.transit as any).planets) {
     lines.push(chalk.bold.cyan('── CURRENT SKY ──'));
     const planets = (result.transit as any).planets;
@@ -284,7 +284,8 @@ export function formatTransits(result: TransitResult): string {
         const zodiac = getZodiacSymbol(planet.sign);
         const deg = formatDegrees(planet.position);
         const rx = planet.retrograde ? chalk.red(' ℞') : '';
-        lines.push(`   ${chalk.yellow(symbol)} ${name.padEnd(10)} ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)}${rx}`);
+        const house = planet.natal_house ? chalk.dim(` → ${planet.natal_house}H`) : '';
+        lines.push(`   ${chalk.yellow(symbol)} ${name.padEnd(10)} ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)}${rx}${house}`);
       }
     }
     lines.push('');
@@ -307,8 +308,11 @@ export function formatTransits(result: TransitResult): string {
                          aspect.aspect === 'square' ? chalk.red :
                          aspect.aspect === 'sextile' ? chalk.blue : chalk.white;
       
-      // Format: transit planet → aspect → natal planet
-      lines.push(`   ${chalk.cyan(tSym)} ${aspect.transit_planet.padEnd(10)} ${aspectColor(aSym + ' ' + aspectName.padEnd(11))} ${chalk.magenta(nSym)} ${aspect.natal_planet.padEnd(10)} ${chalk.dim(`${aspect.orb}°`)}`);
+      // Show natal house if available
+      const natalHouse = (aspect as any).natal_house ? chalk.dim(` (${(aspect as any).natal_house})`) : '';
+      
+      // Format: transit planet → aspect → natal planet (house)
+      lines.push(`   ${chalk.cyan(tSym)} ${aspect.transit_planet.padEnd(10)} ${aspectColor(aSym + ' ' + aspectName.padEnd(11))} ${chalk.magenta(nSym)} ${aspect.natal_planet.padEnd(10)} ${chalk.dim(`${aspect.orb}°`)}${natalHouse}`);
     }
   }
   
