@@ -65,31 +65,85 @@ def chart(
         else:
             output_error("Must provide either --city or both --lat and --lng")
         
-        # Build chart data
+        # Build planet data
         planets = {}
-        for planet_name in ['sun', 'moon', 'mercury', 'venus', 'mars', 
-                           'jupiter', 'saturn', 'uranus', 'neptune', 'pluto',
-                           'chiron', 'north_node', 'south_node']:
+        planet_names = [
+            'sun', 'moon', 'mercury', 'venus', 'mars', 
+            'jupiter', 'saturn', 'uranus', 'neptune', 'pluto',
+            'chiron', 'mean_lilith', 'true_north_lunar_node', 'true_south_lunar_node'
+        ]
+        for planet_name in planet_names:
             planet = getattr(subject, planet_name, None)
             if planet:
+                # Clean up house name
+                house_str = None
+                if hasattr(planet, 'house') and planet.house:
+                    house_str = planet.house.replace('_', ' ').title()
+                
                 planets[planet_name] = {
                     "sign": planet.sign,
                     "position": round(planet.position, 4),
                     "abs_position": round(planet.abs_pos, 4),
-                    "house": planet.house if hasattr(planet, 'house') else None,
+                    "house": house_str,
                     "retrograde": planet.retrograde if hasattr(planet, 'retrograde') else False,
                 }
         
-        # Houses
+        # Houses (all 12)
+        house_names = [
+            'first_house', 'second_house', 'third_house', 'fourth_house',
+            'fifth_house', 'sixth_house', 'seventh_house', 'eighth_house',
+            'ninth_house', 'tenth_house', 'eleventh_house', 'twelfth_house'
+        ]
         houses = {}
-        for i in range(1, 13):
-            house = getattr(subject, f'house_{i}', None) or getattr(subject, f'first_house', None)
-            if hasattr(subject, 'houses_list') and len(subject.houses_list) >= i:
-                house_data = subject.houses_list[i-1]
+        for i, house_name in enumerate(house_names, 1):
+            house = getattr(subject, house_name, None)
+            if house:
                 houses[str(i)] = {
-                    "sign": house_data.sign if hasattr(house_data, 'sign') else None,
-                    "position": round(house_data.position, 4) if hasattr(house_data, 'position') else None,
+                    "sign": house.sign,
+                    "position": round(house.position, 4),
                 }
+        
+        # Natal Aspects
+        from kerykeion import NatalAspects
+        natal_aspects = NatalAspects(subject)
+        aspects = []
+        for asp in natal_aspects.all_aspects:
+            # Only include major aspects with orb <= 8
+            if asp['orbit'] <= 8:
+                aspects.append({
+                    "planet1": asp['p1_name'],
+                    "planet2": asp['p2_name'],
+                    "aspect": asp['aspect'],
+                    "orb": round(asp['orbit'], 2),
+                })
+        
+        # Element and Modality balance
+        element_map = {
+            'Ari': 'Fire', 'Tau': 'Earth', 'Gem': 'Air', 'Can': 'Water',
+            'Leo': 'Fire', 'Vir': 'Earth', 'Lib': 'Air', 'Sco': 'Water',
+            'Sag': 'Fire', 'Cap': 'Earth', 'Aqu': 'Air', 'Pis': 'Water'
+        }
+        mode_map = {
+            'Ari': 'Cardinal', 'Tau': 'Fixed', 'Gem': 'Mutable', 'Can': 'Cardinal',
+            'Leo': 'Fixed', 'Vir': 'Mutable', 'Lib': 'Cardinal', 'Sco': 'Fixed',
+            'Sag': 'Mutable', 'Cap': 'Cardinal', 'Aqu': 'Fixed', 'Pis': 'Mutable'
+        }
+        elements = {"Fire": 0, "Earth": 0, "Air": 0, "Water": 0}
+        modes = {"Cardinal": 0, "Fixed": 0, "Mutable": 0}
+        
+        for p in ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn']:
+            planet = getattr(subject, p, None)
+            if planet:
+                elements[element_map[planet.sign]] += 1
+                modes[mode_map[planet.sign]] += 1
+        
+        # Lunar phase at birth
+        lunar_phase = None
+        if hasattr(subject, 'lunar_phase') and subject.lunar_phase:
+            lunar_phase = {
+                "name": subject.lunar_phase.moon_phase_name,
+                "emoji": subject.lunar_phase.moon_emoji,
+            }
         
         output_json({
             "name": name,
@@ -101,11 +155,16 @@ def chart(
                 "minute": minute,
             },
             "location": {
-                "lat": lat,
-                "lng": lng,
+                "lat": subject.lat if hasattr(subject, 'lat') else lat,
+                "lng": subject.lng if hasattr(subject, 'lng') else lng,
+                "city": subject.city if hasattr(subject, 'city') else None,
             },
             "planets": planets,
             "houses": houses,
+            "aspects": aspects,
+            "elements": elements,
+            "modes": modes,
+            "lunar_phase": lunar_phase,
             "ascendant": {
                 "sign": subject.first_house.sign if hasattr(subject, 'first_house') else None,
                 "position": round(subject.first_house.position, 4) if hasattr(subject, 'first_house') else None,

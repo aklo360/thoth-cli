@@ -37,6 +37,13 @@ const PLANET_SYMBOLS: Record<string, string> = {
   'chiron': '⚷',
   'north_node': '☊',
   'south_node': '☋',
+  'true_north_lunar_node': '☊',
+  'true_south_lunar_node': '☋',
+  'mean_lilith': '⚸',
+  'medium_coeli': 'MC',
+  'imum_coeli': 'IC',
+  'ascendant': 'ASC',
+  'descendant': 'DSC',
 };
 
 // Aspect symbols
@@ -46,6 +53,11 @@ const ASPECT_SYMBOLS: Record<string, string> = {
   'trine': '△',
   'square': '□',
   'sextile': '⚹',
+  'quintile': '⍟',
+  'quincunx': '⚻',
+  'semi-sextile': '⚺',
+  'semi-square': '∠',
+  'sesquiquadrate': '⚼',
 };
 
 /**
@@ -102,31 +114,115 @@ export function formatPlanetPosition(
 export function formatChart(result: ChartResult): string {
   const lines: string[] = [];
   
+  // Header
   lines.push(chalk.bold.white(`\n𓅝 Natal Chart: ${result.name}`));
-  lines.push(chalk.dim(`   ${result.datetime.year}-${String(result.datetime.month).padStart(2, '0')}-${String(result.datetime.day).padStart(2, '0')} ${String(result.datetime.hour).padStart(2, '0')}:${String(result.datetime.minute).padStart(2, '0')}`));
-  lines.push(chalk.dim(`   Lat: ${result.location.lat}, Lng: ${result.location.lng}`));
+  const dateStr = `${result.datetime.year}-${String(result.datetime.month).padStart(2, '0')}-${String(result.datetime.day).padStart(2, '0')} ${String(result.datetime.hour).padStart(2, '0')}:${String(result.datetime.minute).padStart(2, '0')}`;
+  lines.push(chalk.dim(`   ${dateStr}`));
+  if ((result.location as any).city) {
+    lines.push(chalk.dim(`   ${(result.location as any).city}`));
+  } else {
+    lines.push(chalk.dim(`   Lat: ${result.location.lat}, Lng: ${result.location.lng}`));
+  }
+  
+  // Lunar phase at birth
+  if ((result as any).lunar_phase) {
+    lines.push(chalk.dim(`   Born during: ${(result as any).lunar_phase.emoji} ${(result as any).lunar_phase.name}`));
+  }
   lines.push('');
   
-  // Ascendant and Midheaven
+  // Angles
+  lines.push(chalk.bold.cyan('── ANGLES ──'));
   if (result.ascendant.sign) {
-    lines.push(formatPlanetPosition('Ascendant', result.ascendant.sign, result.ascendant.position || 0));
+    lines.push(`   ${chalk.yellow('ASC')}  ${getZodiacSymbol(result.ascendant.sign)} ${result.ascendant.sign} ${formatDegrees(result.ascendant.position || 0)}`);
   }
   if (result.midheaven.sign) {
-    lines.push(formatPlanetPosition('Midheaven', result.midheaven.sign, result.midheaven.position || 0));
+    lines.push(`   ${chalk.yellow('MC')}   ${getZodiacSymbol(result.midheaven.sign)} ${result.midheaven.sign} ${formatDegrees(result.midheaven.position || 0)}`);
   }
   lines.push('');
   
   // Planets
-  const planetOrder = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'chiron', 'north_node'];
+  lines.push(chalk.bold.cyan('── PLANETS ──'));
+  const planetOrder = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
   
   for (const name of planetOrder) {
     const planet = result.planets[name];
     if (planet) {
-      lines.push(formatPlanetPosition(name, planet.sign, planet.position, planet.retrograde));
+      const symbol = getPlanetSymbol(name);
+      const zodiac = getZodiacSymbol(planet.sign);
+      const deg = formatDegrees(planet.position);
+      const rx = planet.retrograde ? chalk.red(' ℞') : '';
+      const house = planet.house ? chalk.dim(` (${planet.house})`) : '';
+      lines.push(`   ${chalk.yellow(symbol)} ${name.padEnd(10)} ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)}${rx}${house}`);
     }
   }
-  
   lines.push('');
+  
+  // Points (Chiron, Lilith, Nodes)
+  lines.push(chalk.bold.cyan('── POINTS ──'));
+  const pointOrder = ['chiron', 'mean_lilith', 'true_north_lunar_node', 'true_south_lunar_node'];
+  const pointNames: Record<string, string> = {
+    'chiron': 'Chiron',
+    'mean_lilith': 'Lilith',
+    'true_north_lunar_node': 'North Node',
+    'true_south_lunar_node': 'South Node',
+  };
+  
+  for (const name of pointOrder) {
+    const planet = result.planets[name];
+    if (planet) {
+      const symbol = getPlanetSymbol(name);
+      const displayName = pointNames[name] || name;
+      const zodiac = getZodiacSymbol(planet.sign);
+      const deg = formatDegrees(planet.position);
+      const house = planet.house ? chalk.dim(` (${planet.house})`) : '';
+      lines.push(`   ${chalk.yellow(symbol)} ${displayName.padEnd(10)} ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)}${house}`);
+    }
+  }
+  lines.push('');
+  
+  // Houses
+  if (result.houses && Object.keys(result.houses).length > 0) {
+    lines.push(chalk.bold.cyan('── HOUSES ──'));
+    for (let i = 1; i <= 12; i++) {
+      const house = result.houses[String(i)];
+      if (house && house.sign) {
+        const zodiac = getZodiacSymbol(house.sign);
+        const deg = formatDegrees(house.position || 0);
+        const label = i === 1 ? '(ASC)' : i === 4 ? '(IC)' : i === 7 ? '(DSC)' : i === 10 ? '(MC)' : '';
+        lines.push(`   ${String(i).padStart(2)}  ${chalk.cyan(zodiac)} ${house.sign} ${chalk.dim(deg)} ${chalk.yellow(label)}`);
+      }
+    }
+    lines.push('');
+  }
+  
+  // Elements & Modes
+  if ((result as any).elements && (result as any).modes) {
+    lines.push(chalk.bold.cyan('── BALANCE ──'));
+    const elem = (result as any).elements;
+    const mode = (result as any).modes;
+    lines.push(`   ${chalk.red('🜂 Fire:')} ${elem.Fire}  ${chalk.green('🜃 Earth:')} ${elem.Earth}  ${chalk.cyan('🜁 Air:')} ${elem.Air}  ${chalk.blue('🜄 Water:')} ${elem.Water}`);
+    lines.push(`   ${chalk.yellow('Cardinal:')} ${mode.Cardinal}  ${chalk.magenta('Fixed:')} ${mode.Fixed}  ${chalk.white('Mutable:')} ${mode.Mutable}`);
+    lines.push('');
+  }
+  
+  // Natal Aspects (top 10 tightest)
+  if ((result as any).aspects && (result as any).aspects.length > 0) {
+    lines.push(chalk.bold.cyan('── ASPECTS ──'));
+    const aspects = (result as any).aspects.slice(0, 15); // Top 15
+    for (const asp of aspects) {
+      const p1 = getPlanetSymbol(asp.planet1.toLowerCase().replace(/ /g, '_'));
+      const p2 = getPlanetSymbol(asp.planet2.toLowerCase().replace(/ /g, '_'));
+      const aspectSym = getAspectSymbol(asp.aspect);
+      const aspectColor = asp.aspect === 'conjunction' ? chalk.yellow :
+                         asp.aspect === 'opposition' ? chalk.red :
+                         asp.aspect === 'trine' ? chalk.green :
+                         asp.aspect === 'square' ? chalk.red :
+                         asp.aspect === 'sextile' ? chalk.blue : chalk.white;
+      lines.push(`   ${p1} ${asp.planet1.padEnd(12)} ${aspectColor(aspectSym)} ${p2} ${asp.planet2.padEnd(12)} ${chalk.dim(`(${asp.orb}°)`)}`);
+    }
+    lines.push('');
+  }
+  
   return lines.join('\n');
 }
 
