@@ -281,7 +281,7 @@ export function formatTransits(result: TransitResult): string {
   }
   lines.push('');
   
-  // Current sky positions - ultra lean
+  // Current sky positions - just current, no natal
   if ((result.transit as any).planets) {
     lines.push(chalk.bold.cyan('── CURRENT SKY ──'));
     const planets = (result.transit as any).planets;
@@ -292,10 +292,8 @@ export function formatTransits(result: TransitResult): string {
         const zodiac = getZodiacSymbol(planet.sign);
         const deg = formatDegrees(planet.position);
         const rx = planet.retrograde ? chalk.red('℞') : ' ';
-        // Houses: current → natal (compact)
         const cH = planet.house ? planet.house.replace(/ house/i, '').replace(/first/i, '1').replace(/second/i, '2').replace(/third/i, '3').replace(/fourth/i, '4').replace(/fifth/i, '5').replace(/sixth/i, '6').replace(/seventh/i, '7').replace(/eighth/i, '8').replace(/ninth/i, '9').replace(/tenth/i, '10').replace(/eleventh/i, '11').replace(/twelfth/i, '12') : '?';
-        const nH = planet.natal_house || '?';
-        lines.push(`   ${chalk.yellow(symbol)}  ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)} ${rx} ${chalk.dim(`${cH}H→${nH}H`)}`);
+        lines.push(`   ${chalk.yellow(symbol)}  ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)} ${rx} ${chalk.dim(`${cH}H`)}`);
       }
     }
     lines.push('');
