@@ -238,32 +238,73 @@ def transit(
         from kerykeion import SynastryAspects
         synastry = SynastryAspects(transit_subj, natal)
         
-        # Build a lookup for natal planet houses
+        # Build lookups for planet houses
+        # Short name mapping
+        short_names = {
+            'True_North_Lunar_Node': 'NN',
+            'True_South_Lunar_Node': 'SN', 
+            'Mean_Lilith': 'Lilith',
+            'Medium_Coeli': 'MC',
+            'Imum_Coeli': 'IC',
+            'Ascendant': 'ASC',
+            'Descendant': 'DSC',
+        }
+        
+        def get_short_name(name):
+            return short_names.get(name, name)
+        
+        # House name to number mapping
+        def house_to_num(house_str):
+            if not house_str:
+                return None
+            house_str = house_str.lower().replace('_', ' ')
+            house_map = {
+                'first house': 1, 'second house': 2, 'third house': 3, 'fourth house': 4,
+                'fifth house': 5, 'sixth house': 6, 'seventh house': 7, 'eighth house': 8,
+                'ninth house': 9, 'tenth house': 10, 'eleventh house': 11, 'twelfth house': 12
+            }
+            return house_map.get(house_str, None)
+        
+        # Natal planet houses
         natal_planet_houses = {}
         for p in ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 
                   'uranus', 'neptune', 'pluto', 'chiron', 'mean_lilith',
                   'true_north_lunar_node', 'true_south_lunar_node']:
             planet = getattr(natal, p, None)
             if planet and hasattr(planet, 'house') and planet.house:
-                # Normalize name for lookup
                 name_map = {
                     'true_north_lunar_node': 'True_North_Lunar_Node',
                     'true_south_lunar_node': 'True_South_Lunar_Node',
                     'mean_lilith': 'Mean_Lilith',
                 }
                 key = name_map.get(p, p.capitalize())
-                natal_planet_houses[key] = planet.house.replace('_', ' ').title()
+                natal_planet_houses[key] = house_to_num(planet.house)
+        
+        # Transit planet houses
+        transit_planet_houses = {}
+        for p in ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 
+                  'uranus', 'neptune', 'pluto', 'chiron', 'mean_lilith',
+                  'true_north_lunar_node', 'true_south_lunar_node']:
+            planet = getattr(transit_subj, p, None)
+            if planet and hasattr(planet, 'house') and planet.house:
+                name_map = {
+                    'true_north_lunar_node': 'True_North_Lunar_Node',
+                    'true_south_lunar_node': 'True_South_Lunar_Node',
+                    'mean_lilith': 'Mean_Lilith',
+                }
+                key = name_map.get(p, p.capitalize())
+                transit_planet_houses[key] = house_to_num(planet.house)
         
         aspects = []
         for asp in synastry.all_aspects:
             if asp['orbit'] <= orb:
-                natal_house = natal_planet_houses.get(asp['p2_name'], None)
                 aspects.append({
-                    "transit_planet": asp['p1_name'],
-                    "natal_planet": asp['p2_name'],
+                    "transit_planet": get_short_name(asp['p1_name']),
+                    "natal_planet": get_short_name(asp['p2_name']),
                     "aspect": asp['aspect'],
                     "orb": round(asp['orbit'], 2),
-                    "natal_house": natal_house,
+                    "transit_house": transit_planet_houses.get(asp['p1_name'], None),
+                    "natal_house": natal_planet_houses.get(asp['p2_name'], None),
                 })
         
         # Sort by orb (tightest first)

@@ -44,6 +44,14 @@ const PLANET_SYMBOLS: Record<string, string> = {
   'imum_coeli': 'IC',
   'ascendant': 'ASC',
   'descendant': 'DSC',
+  // Short names from transit aspects
+  'nn': '☊',
+  'sn': '☋',
+  'lilith': '⚸',
+  'mc': 'MC',
+  'ic': 'IC',
+  'asc': 'ASC',
+  'dsc': 'DSC',
 };
 
 // Aspect symbols
@@ -316,6 +324,7 @@ export function formatTransits(result: TransitResult): string {
   
   // Transit aspects to natal
   lines.push(chalk.bold.cyan('── TRANSITS TO NATAL ──'));
+  lines.push(chalk.dim('   Transit              Aspect        Natal               Houses'));
   if (result.aspects.length === 0) {
     lines.push(chalk.dim('   No aspects within orb'));
   } else {
@@ -331,11 +340,15 @@ export function formatTransits(result: TransitResult): string {
                          aspect.aspect === 'square' ? chalk.red :
                          aspect.aspect === 'sextile' ? chalk.blue : chalk.white;
       
-      // Show natal house if available
-      const natalHouse = (aspect as any).natal_house ? chalk.dim(` (${(aspect as any).natal_house})`) : '';
+      // Houses: transit → natal
+      const tH = (aspect as any).transit_house;
+      const nH = (aspect as any).natal_house;
+      const houses = (tH || nH) ? chalk.dim(`${tH || '?'}H → ${nH || '?'}H`) : '';
       
-      // Format: transit planet → aspect → natal planet (house)
-      lines.push(`   ${chalk.cyan(tSym)} ${aspect.transit_planet.padEnd(10)} ${aspectColor(aSym + ' ' + aspectName.padEnd(11))} ${chalk.magenta(nSym)} ${aspect.natal_planet.padEnd(10)} ${chalk.dim(`${aspect.orb}°`)}${natalHouse}`);
+      // Format: symbol name | aspect | symbol name | orb | houses
+      const tName = aspect.transit_planet.padEnd(7);
+      const nName = aspect.natal_planet.padEnd(7);
+      lines.push(`   ${chalk.cyan(tSym)} ${tName} ${aspectColor(aSym + ' ' + aspectName.padEnd(11))} ${chalk.magenta(nSym)} ${nName} ${chalk.dim(`${aspect.orb}°`.padEnd(5))} ${houses}`);
     }
   }
   
