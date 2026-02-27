@@ -76,33 +76,36 @@ jobs:
           files: dist/**/*
           generate_release_notes: true
 
-  publish-npm:
-    name: Publish to npm
-    needs: release
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Install dependencies
-        run: |
-          cd packages/cli
-          npm install
-
-      - name: Build
-        run: |
-          cd packages/cli
-          npm run build
-
-      - name: Publish
-        run: |
-          cd packages/cli
-          npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  # NOTE: npm publishing disabled until ready
+  # Uncomment and add NPM_TOKEN secret when ready to publish
+  #
+  # publish-npm:
+  #   name: Publish to npm
+  #   needs: release
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Setup Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '20'
+  #         registry-url: 'https://registry.npmjs.org'
+  #
+  #     - name: Install dependencies
+  #       run: |
+  #         cd packages/cli
+  #         npm install
+  #
+  #     - name: Build
+  #       run: |
+  #         cd packages/cli
+  #         npm run build
+  #
+  #     - name: Publish
+  #       run: |
+  #         cd packages/cli
+  #         npm publish --access public
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
