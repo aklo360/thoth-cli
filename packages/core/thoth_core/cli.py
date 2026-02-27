@@ -317,6 +317,30 @@ def transit(
                 "emoji": transit_subj.lunar_phase.moon_emoji,
             }
         
+        # Transit chart houses (current sky houses)
+        transit_houses = {}
+        for i, house_name in enumerate(['first_house', 'second_house', 'third_house', 'fourth_house',
+                                        'fifth_house', 'sixth_house', 'seventh_house', 'eighth_house',
+                                        'ninth_house', 'tenth_house', 'eleventh_house', 'twelfth_house'], 1):
+            house = getattr(transit_subj, house_name, None)
+            if house:
+                transit_houses[str(i)] = {
+                    "sign": house.sign,
+                    "position": round(house.position, 2),
+                }
+        
+        # Natal chart houses for comparison
+        natal_houses_data = {}
+        for i, house_name in enumerate(['first_house', 'second_house', 'third_house', 'fourth_house',
+                                        'fifth_house', 'sixth_house', 'seventh_house', 'eighth_house',
+                                        'ninth_house', 'tenth_house', 'eleventh_house', 'twelfth_house'], 1):
+            house = getattr(natal, house_name, None)
+            if house:
+                natal_houses_data[str(i)] = {
+                    "sign": house.sign,
+                    "position": round(house.position, 2),
+                }
+        
         output_json({
             "natal": {
                 "name": natal.name if hasattr(natal, 'name') else "Natal",
@@ -326,8 +350,10 @@ def transit(
             "transit": {
                 "datetime": f"{transit_year or now.year}-{(transit_month or now.month):02d}-{(transit_day or now.day):02d}",
                 "planets": transit_planets_data,
+                "houses": transit_houses,
                 "lunar_phase": lunar_phase,
             },
+            "natal_houses": natal_houses_data,
             "aspects": aspects,
         })
         

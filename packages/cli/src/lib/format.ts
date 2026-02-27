@@ -284,8 +284,29 @@ export function formatTransits(result: TransitResult): string {
         const zodiac = getZodiacSymbol(planet.sign);
         const deg = formatDegrees(planet.position);
         const rx = planet.retrograde ? chalk.red(' ℞') : '';
-        const house = planet.natal_house ? chalk.dim(` → ${planet.natal_house}H`) : '';
+        const house = planet.natal_house ? chalk.dim(` (natal ${planet.natal_house}H)`) : '';
         lines.push(`   ${chalk.yellow(symbol)} ${name.padEnd(10)} ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)}${rx}${house}`);
+      }
+    }
+    lines.push('');
+  }
+  
+  // Houses comparison: Transit vs Natal
+  const transitHouses = (result.transit as any).houses;
+  const natalHouses = (result as any).natal_houses;
+  if (transitHouses && natalHouses && Object.keys(transitHouses).length > 0) {
+    lines.push(chalk.bold.cyan('── HOUSES ──'));
+    lines.push(chalk.dim('        TRANSIT          NATAL'));
+    for (let i = 1; i <= 12; i++) {
+      const tH = transitHouses[String(i)];
+      const nH = natalHouses[String(i)];
+      if (tH && nH) {
+        const label = i === 1 ? 'ASC' : i === 4 ? 'IC' : i === 7 ? 'DSC' : i === 10 ? 'MC' : `${i}H`;
+        const tZodiac = getZodiacSymbol(tH.sign);
+        const nZodiac = getZodiacSymbol(nH.sign);
+        const tDeg = formatDegrees(tH.position);
+        const nDeg = formatDegrees(nH.position);
+        lines.push(`   ${chalk.yellow(label.padEnd(4))} ${tZodiac} ${tH.sign} ${chalk.dim(tDeg)}   ${nZodiac} ${nH.sign} ${chalk.dim(nDeg)}`);
       }
     }
     lines.push('');
