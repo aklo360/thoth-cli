@@ -15,13 +15,23 @@ const program = new Command();
 
 program
   .name('thoth')
-  .description('𓅝 Astrological calculations from the command line')
+  .description(`𓅝 Astrological calculations from the command line
+
+Examples:
+  thoth chart --date 1991-07-08 --time 14:06 --city "New York"
+  thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "New York"
+  thoth moon
+  thoth ephemeris --body pluto`)
   .version('0.1.0');
 
 // Chart command
 program
   .command('chart')
-  .description('Calculate a natal chart')
+  .description(`Calculate a natal chart
+
+  Examples:
+    thoth chart --date 1991-07-08 --time 14:06 --city "New York" --name "AKLO"
+    thoth chart --date 1986-07-29 --time 12:00 --lat 40.7128 --lng -74.0060`)
   .requiredOption('--date <date>', 'Birth date (YYYY-MM-DD)')
   .requiredOption('--time <time>', 'Birth time (HH:MM)')
   .option('--lat <lat>', 'Latitude', parseFloat)
@@ -68,7 +78,11 @@ program
 // Transit command
 program
   .command('transit')
-  .description('Calculate transits to a natal chart')
+  .description(`Calculate transits to a natal chart
+
+  Examples:
+    thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "New York"
+    thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --orb 1`)
   .requiredOption('--natal-date <date>', 'Natal date (YYYY-MM-DD)')
   .requiredOption('--natal-time <time>', 'Natal time (HH:MM)')
   .option('--lat <lat>', 'Latitude', parseFloat)
