@@ -205,7 +205,7 @@ export function formatChart(result: ChartResult): string {
     lines.push('');
   }
   
-  // Natal Aspects (top 10 tightest)
+  // Natal Aspects (top 15 tightest)
   if ((result as any).aspects && (result as any).aspects.length > 0) {
     lines.push(chalk.bold.cyan('── ASPECTS ──'));
     const aspects = (result as any).aspects.slice(0, 15); // Top 15
@@ -213,12 +213,13 @@ export function formatChart(result: ChartResult): string {
       const p1 = getPlanetSymbol(asp.planet1.toLowerCase().replace(/ /g, '_'));
       const p2 = getPlanetSymbol(asp.planet2.toLowerCase().replace(/ /g, '_'));
       const aspectSym = getAspectSymbol(asp.aspect);
+      const aspectName = asp.aspect.charAt(0).toUpperCase() + asp.aspect.slice(1);
       const aspectColor = asp.aspect === 'conjunction' ? chalk.yellow :
                          asp.aspect === 'opposition' ? chalk.red :
                          asp.aspect === 'trine' ? chalk.green :
                          asp.aspect === 'square' ? chalk.red :
                          asp.aspect === 'sextile' ? chalk.blue : chalk.white;
-      lines.push(`   ${p1} ${asp.planet1.padEnd(12)} ${aspectColor(aspectSym)} ${p2} ${asp.planet2.padEnd(12)} ${chalk.dim(`(${asp.orb}°)`)}`);
+      lines.push(`   ${p1} ${asp.planet1.padEnd(10)} ${aspectColor(aspectSym + ' ' + aspectName.padEnd(11))} ${p2} ${asp.planet2.padEnd(10)} ${chalk.dim(`${asp.orb}°`)}`);
     }
     lines.push('');
   }
