@@ -296,16 +296,24 @@ def transit(
                         return i + 1
             return 1  # Default to 1st house
         
-        # Current transiting planets with natal house positions
+        # Current transiting planets with BOTH current house and natal house
         transit_planets_data = {}
         for p in ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']:
             planet = getattr(transit_subj, p, None)
             if planet:
+                # Current house (from transit chart)
+                current_house = None
+                if hasattr(planet, 'house') and planet.house:
+                    current_house = planet.house.replace('_', ' ').title()
+                
+                # Natal house (where this transit activates in natal chart)
                 natal_house = get_natal_house(planet.abs_pos)
+                
                 transit_planets_data[p] = {
                     "sign": planet.sign,
                     "position": round(planet.position, 2),
                     "retrograde": planet.retrograde if hasattr(planet, 'retrograde') else False,
+                    "house": current_house,
                     "natal_house": natal_house,
                 }
         

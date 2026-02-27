@@ -273,7 +273,7 @@ export function formatTransits(result: TransitResult): string {
   }
   lines.push('');
   
-  // Current sky positions with natal house
+  // Current sky positions with current house → natal house
   if ((result.transit as any).planets) {
     lines.push(chalk.bold.cyan('── CURRENT SKY ──'));
     const planets = (result.transit as any).planets;
@@ -284,8 +284,10 @@ export function formatTransits(result: TransitResult): string {
         const zodiac = getZodiacSymbol(planet.sign);
         const deg = formatDegrees(planet.position);
         const rx = planet.retrograde ? chalk.red(' ℞') : '';
-        const house = planet.natal_house ? chalk.dim(` (natal ${planet.natal_house}H)`) : '';
-        lines.push(`   ${chalk.yellow(symbol)} ${name.padEnd(10)} ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)}${rx}${house}`);
+        // Show current house, then natal house activation
+        const currentH = planet.house ? chalk.white(` ${planet.house}`) : '';
+        const natalH = planet.natal_house ? chalk.dim(` → natal ${planet.natal_house}H`) : '';
+        lines.push(`   ${chalk.yellow(symbol)} ${name.padEnd(10)} ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)}${rx}${currentH}${natalH}`);
       }
     }
     lines.push('');
