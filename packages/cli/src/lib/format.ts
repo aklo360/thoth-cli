@@ -281,7 +281,7 @@ export function formatTransits(result: TransitResult): string {
   }
   lines.push('');
   
-  // Current sky positions with current house → natal house
+  // Current sky positions - ultra lean
   if ((result.transit as any).planets) {
     lines.push(chalk.bold.cyan('── CURRENT SKY ──'));
     const planets = (result.transit as any).planets;
@@ -291,40 +291,39 @@ export function formatTransits(result: TransitResult): string {
         const symbol = getPlanetSymbol(name);
         const zodiac = getZodiacSymbol(planet.sign);
         const deg = formatDegrees(planet.position);
-        const rx = planet.retrograde ? chalk.red(' ℞') : '';
-        // Show current house, then natal house activation
-        const currentH = planet.house ? chalk.white(` ${planet.house}`) : '';
-        const natalH = planet.natal_house ? chalk.dim(` → natal ${planet.natal_house}H`) : '';
-        lines.push(`   ${chalk.yellow(symbol)} ${name.padEnd(10)} ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)}${rx}${currentH}${natalH}`);
+        const rx = planet.retrograde ? chalk.red('℞') : ' ';
+        // Houses: current → natal (compact)
+        const cH = planet.house ? planet.house.replace(/ house/i, '').replace(/first/i, '1').replace(/second/i, '2').replace(/third/i, '3').replace(/fourth/i, '4').replace(/fifth/i, '5').replace(/sixth/i, '6').replace(/seventh/i, '7').replace(/eighth/i, '8').replace(/ninth/i, '9').replace(/tenth/i, '10').replace(/eleventh/i, '11').replace(/twelfth/i, '12') : '?';
+        const nH = planet.natal_house || '?';
+        lines.push(`   ${chalk.yellow(symbol)}  ${chalk.cyan(zodiac)} ${planet.sign} ${chalk.magenta(deg)} ${rx} ${chalk.dim(`${cH}H → ${nH}H`)}`);
       }
     }
     lines.push('');
   }
   
-  // Houses comparison: Transit vs Natal
+  // Houses comparison: Transit vs Natal - compact table
   const transitHouses = (result.transit as any).houses;
   const natalHouses = (result as any).natal_houses;
   if (transitHouses && natalHouses && Object.keys(transitHouses).length > 0) {
     lines.push(chalk.bold.cyan('── HOUSES ──'));
-    lines.push(chalk.dim('        TRANSIT          NATAL'));
+    lines.push(chalk.dim('       TRANSIT        NATAL'));
     for (let i = 1; i <= 12; i++) {
       const tH = transitHouses[String(i)];
       const nH = natalHouses[String(i)];
       if (tH && nH) {
-        const label = i === 1 ? 'ASC' : i === 4 ? 'IC' : i === 7 ? 'DSC' : i === 10 ? 'MC' : `${i}H`;
+        const label = i === 1 ? 'ASC' : i === 4 ? 'IC' : i === 7 ? 'DSC' : i === 10 ? 'MC' : `${i}`.padStart(2) + 'H';
         const tZodiac = getZodiacSymbol(tH.sign);
         const nZodiac = getZodiacSymbol(nH.sign);
         const tDeg = formatDegrees(tH.position);
         const nDeg = formatDegrees(nH.position);
-        lines.push(`   ${chalk.yellow(label.padEnd(4))} ${tZodiac} ${tH.sign} ${chalk.dim(tDeg)}   ${nZodiac} ${nH.sign} ${chalk.dim(nDeg)}`);
+        lines.push(`   ${chalk.yellow(label.padStart(3))}  ${tZodiac} ${tH.sign} ${chalk.dim(tDeg)}  ${nZodiac} ${nH.sign} ${chalk.dim(nDeg)}`);
       }
     }
     lines.push('');
   }
   
-  // Transit aspects to natal
+  // Transit aspects to natal - ultra lean table
   lines.push(chalk.bold.cyan('── TRANSITS TO NATAL ──'));
-  lines.push(chalk.dim('   Transit              Aspect        Natal               Houses'));
   if (result.aspects.length === 0) {
     lines.push(chalk.dim('   No aspects within orb'));
   } else {
@@ -332,7 +331,14 @@ export function formatTransits(result: TransitResult): string {
       const tSym = getPlanetSymbol(aspect.transit_planet.toLowerCase().replace(/ /g, '_'));
       const nSym = getPlanetSymbol(aspect.natal_planet.toLowerCase().replace(/ /g, '_'));
       const aSym = getAspectSymbol(aspect.aspect);
-      const aspectName = aspect.aspect.charAt(0).toUpperCase() + aspect.aspect.slice(1);
+      const aspectShort = aspect.aspect === 'conjunction' ? 'CNJ' :
+                         aspect.aspect === 'opposition' ? 'OPP' :
+                         aspect.aspect === 'trine' ? 'TRI' :
+                         aspect.aspect === 'square' ? 'SQR' :
+                         aspect.aspect === 'sextile' ? 'SXT' :
+                         aspect.aspect === 'quintile' ? 'QNT' :
+                         aspect.aspect === 'quincunx' ? 'QCX' : 
+                         String(aspect.aspect).slice(0, 3).toUpperCase();
       
       const aspectColor = aspect.aspect === 'conjunction' ? chalk.yellow :
                          aspect.aspect === 'opposition' ? chalk.red :
@@ -343,12 +349,12 @@ export function formatTransits(result: TransitResult): string {
       // Houses: transit → natal
       const tH = (aspect as any).transit_house;
       const nH = (aspect as any).natal_house;
-      const houses = (tH || nH) ? chalk.dim(`${tH || '?'}H → ${nH || '?'}H`) : '';
+      const houses = `${tH || '?'}→${nH || '?'}`;
       
-      // Format: symbol name | aspect | symbol name | orb | houses
-      const tName = aspect.transit_planet.padEnd(7);
-      const nName = aspect.natal_planet.padEnd(7);
-      lines.push(`   ${chalk.cyan(tSym)} ${tName} ${aspectColor(aSym + ' ' + aspectName.padEnd(11))} ${chalk.magenta(nSym)} ${nName} ${chalk.dim(`${aspect.orb}°`.padEnd(5))} ${houses}`);
+      // Format: transit_sym aspect_sym natal_sym | aspect_short | orb | houses
+      // Columns: symbol(2) symbol(2) symbol(2) | name(3) | orb(5) | houses(5)
+      const orb = aspect.orb.toFixed(2).padStart(5);
+      lines.push(`   ${chalk.cyan(tSym)} ${aspectColor(aSym)} ${chalk.magenta(nSym)}  ${aspectColor(aspectShort)}  ${chalk.dim(orb + '°')}  ${chalk.dim(houses)}`);
     }
   }
   
