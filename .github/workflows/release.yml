@@ -39,21 +39,23 @@ jobs:
           cd packages/core
           pyinstaller --onefile --name thoth-core thoth_core/cli.py
 
-      - name: Rename binary (Unix)
+      - name: Rename and compress binary (Unix)
         if: matrix.os != 'windows-latest'
         run: |
           mv packages/core/dist/thoth-core packages/core/dist/thoth-core-${{ matrix.target }}
+          gzip -9 packages/core/dist/thoth-core-${{ matrix.target }}
 
-      - name: Rename binary (Windows)
+      - name: Rename and compress binary (Windows)
         if: matrix.os == 'windows-latest'
         run: |
           mv packages/core/dist/thoth-core.exe packages/core/dist/thoth-core-${{ matrix.target }}.exe
+          gzip -9 packages/core/dist/thoth-core-${{ matrix.target }}.exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: thoth-core-${{ matrix.target }}
-          path: packages/core/dist/thoth-core-${{ matrix.target }}*
+          path: packages/core/dist/thoth-core-${{ matrix.target }}*.gz
 
   release:
     name: Create Release
