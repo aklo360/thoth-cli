@@ -1625,7 +1625,7 @@ def tarot_draw(
 ):
     """Draw tarot cards with true randomness (cryptographic entropy)."""
     try:
-        from .tarot import draw_cards, SPREADS
+        from thoth_core.tarot import draw_cards, SPREADS
         
         # If spread specified, use its count
         if spread in SPREADS:
@@ -1649,7 +1649,7 @@ def tarot_card(
 ):
     """Look up a specific tarot card."""
     try:
-        from .tarot import get_card
+        from thoth_core.tarot import get_card
         
         card = get_card(identifier)
         if card is None:
@@ -1668,7 +1668,7 @@ def tarot_deck(
 ):
     """List tarot cards."""
     try:
-        from .tarot import get_deck
+        from thoth_core.tarot import get_deck
         
         cards = get_deck(filter_type)
         output_json({
@@ -1686,7 +1686,7 @@ def tarot_deck(
 def tarot_spreads():
     """List available tarot spreads."""
     try:
-        from .tarot import SPREADS
+        from thoth_core.tarot import SPREADS
         
         spreads = []
         for key, spread in SPREADS.items():

@@ -1146,7 +1146,7 @@ program
 
 // Banner
 console.log(chalk.dim(''));
-console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.22'));
+console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.23'));
 console.log(chalk.dim(''));
 
 program.parse();
