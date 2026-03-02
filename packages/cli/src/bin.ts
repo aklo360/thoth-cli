@@ -9,12 +9,12 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { writeFileSync } from 'fs';
 import { 
-  chart, transit, ephemeris, version,
+  chart, transit, moon, ephemeris, version,
   solarReturn, lunarReturn, synastry, progressions, ephemerisRange,
   composite, solarArc, horary, score, moonExtended, transitScan, ephemerisMulti
 } from './lib/core.js';
 import { 
-  formatChart, formatTransits, formatEphemeris,
+  formatChart, formatTransits, formatMoon, formatEphemeris,
   formatSolarReturn, formatLunarReturn, formatSynastry, 
   formatProgressions, formatEphemerisRange,
   formatComposite, formatSolarArc, formatHorary,
@@ -81,7 +81,7 @@ EPHEMERIS & MOON
 REFERENCE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   thoth key                                           # full symbol reference`)
-  .version('0.2.20');
+  .version('0.2.21');
 
 // Chart command
 program
@@ -624,11 +624,12 @@ program
 // Moon command
 program
   .command('moon')
-  .description('Get moon phase, eclipses, sunrise/sunset')
+  .description('Get moon phase and position')
   .option('--date <date>', 'Date (YYYY-MM-DD, default: today)')
   .option('--lat <lat>', 'Latitude', parseFloat, 40.7128)
   .option('--lng <lng>', 'Longitude', parseFloat, -74.0060)
-  .option('--tz <tz>', 'Timezone', 'America/New_York')
+  .option('--tz <tz>', 'Timezone (for --extended)', 'America/New_York')
+  .option('-e, --extended', 'Show eclipses, sunrise/sunset, upcoming phases')
   .option('--json', 'Output raw JSON')
   .action(async (options) => {
     let year, month, day;
@@ -636,13 +637,32 @@ program
       [year, month, day] = options.date.split('-').map(Number);
     }
     
-    const spinner = ora('Getting moon data...').start();
+    if (options.extended) {
+      const spinner = ora('Getting moon details...').start();
+      const result = await moonExtended({
+        year, month, day,
+        lat: options.lat, lng: options.lng, tz: options.tz,
+      });
+      spinner.stop();
+      
+      if (isError(result)) {
+        console.error(chalk.red(`Error: ${result.error}`));
+        process.exit(1);
+      }
+      
+      if (options.json) {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        console.log(formatMoonExtended(result));
+      }
+      return;
+    }
     
-    const result = await moonExtended({
+    const spinner = ora('Getting moon phase...').start();
+    const result = await moon({
       year, month, day,
-      lat: options.lat, lng: options.lng, tz: options.tz,
+      lat: options.lat, lng: options.lng,
     });
-    
     spinner.stop();
     
     if (isError(result)) {
@@ -653,7 +673,7 @@ program
     if (options.json) {
       console.log(JSON.stringify(result, null, 2));
     } else {
-      console.log(formatMoonExtended(result));
+      console.log(formatMoon(result));
     }
   });
 
@@ -1022,7 +1042,7 @@ program
 
 // Banner
 console.log(chalk.dim(''));
-console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.20'));
+console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.21'));
 console.log(chalk.dim(''));
 
 program.parse();
