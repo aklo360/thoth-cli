@@ -37,7 +37,9 @@ jobs:
       - name: Build binary
         run: |
           cd packages/core
-          pyinstaller --onefile --name thoth-core thoth_core/cli.py
+          pyinstaller --onefile --name thoth-core \
+            --collect-data kerykeion \
+            thoth_core/cli.py
 
       - name: Rename and compress binary (Unix)
         if: matrix.os != 'windows-latest'

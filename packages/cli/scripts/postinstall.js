@@ -14,7 +14,7 @@ import https from 'https';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const VERSION = '0.2.10';
+const VERSION = '0.2.12';
 const REPO = 'aklo360/thoth-cli';
 
 // Use jsDelivr CDN for faster downloads (mirrors GitHub releases)
