@@ -12,7 +12,7 @@ import https from 'https';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const VERSION = '0.2.5';
+const VERSION = '0.2.6';
 const REPO = 'aklo360/thoth-cli';
 const BASE_URL = `https://github.com/${REPO}/releases/download/v${VERSION}`;
 
