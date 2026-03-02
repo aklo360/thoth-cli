@@ -2,6 +2,77 @@
 
 All notable changes to thoth-cli will be documented in this file.
 
+## [0.2.1] - 2026-03-02
+
+### Added
+
+- **`thoth composite`** — Composite (midpoint) charts for relationships
+  - Creates a single "relationship entity" chart
+  - Each planet is the midpoint between both people's placements
+  - SVG output support
+
+- **`thoth solar-arc`** — Solar arc directions
+  - All planets move forward by the Sun's arc (~1°/year)
+  - Directed-to-natal aspect detection
+  - Naibod method (1°/year)
+
+- **`thoth horary`** — Horary astrology for divination
+  - Cast a chart for the moment a question is asked
+  - Traditional house rulership system
+  - Moon void-of-course detection
+  - Strictures against judgment (early/late ASC, Saturn positions, Via Combusta)
+  - Planetary hour calculation
+  - Moon aspects with applying/separating detection
+  - Guidance for reading the chart
+
+---
+
+## [0.2.0] - 2026-03-02
+
+### 🌟 Major Feature Release
+
+#### New Commands
+
+- **`thoth solar-return`** — Calculate annual solar return charts
+  - Full chart for when Sun returns to natal position
+  - Year-ahead forecasting
+  - Location override support
+
+- **`thoth lunar-return`** — Calculate lunar return charts
+  - Full chart for when Moon returns to natal position (~monthly)
+  - Month-ahead emotional weather forecasting
+  - Search from any date
+
+- **`thoth synastry`** — Relationship chart analysis
+  - Inter-chart aspects between two people
+  - Key position comparison
+  - Configurable orb
+
+- **`thoth progressions`** — Secondary progressions
+  - Day-for-a-year method
+  - Progressed-to-natal aspects
+  - Age calculation
+
+- **`thoth ephemeris-range`** — Track planetary positions over time
+  - Sign ingress detection
+  - Retrograde station detection
+  - Configurable step (day/week/month)
+
+#### New Features
+
+- **SVG Chart Generation** — Beautiful wheel charts via Kerykeion
+  - All chart commands now support `--svg` flag
+  - `--svg-file <path>` to save directly to file
+  - Natal, Transit, Synastry, and Return charts
+
+#### Technical
+
+- Python core updated to v0.2.0
+- Improved TypeScript type definitions
+- Better error handling
+
+---
+
 ## [0.1.0] - 2026-02-27
 
 ### 🌟 Initial Release

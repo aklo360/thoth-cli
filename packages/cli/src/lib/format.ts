@@ -80,7 +80,11 @@ function getAspectColor(aspect: string): typeof chalk {
   };
   return colorMap[aspect] || chalk.white;
 }
-import type { ChartResult, TransitResult, MoonResult, EphemerisResult, Aspect } from '../types.js';
+import type { 
+  ChartResult, TransitResult, MoonResult, EphemerisResult, Aspect,
+  SolarReturnResult, LunarReturnResult, SynastryResult, ProgressionsResult, EphemerisRangeResult,
+  CompositeResult, SolarArcResult, HoraryResult
+} from '../types.js';
 
 // Zodiac symbols
 const ZODIAC_SYMBOLS: Record<string, string> = {
@@ -458,6 +462,473 @@ export function formatEphemeris(result: EphemerisResult): string {
   lines.push('');
   lines.push(`   ${pColor(symbol)} ${chalk.white(result.body)} in ${zColor(result.sign)} ${chalk.white(formatDegrees(result.position))}${rx}`);
   lines.push(`   ${chalk.dim(`Absolute: ${result.abs_position.toFixed(4)}°`)}`);
+  lines.push('');
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format solar return result
+ */
+export function formatSolarReturn(result: SolarReturnResult): string {
+  const lines: string[] = [];
+  
+  lines.push(chalk.bold.white(`\n☉ Solar Return ${result.return_year}`));
+  lines.push(chalk.dim(`   Natal: ${result.natal_date}`));
+  lines.push(chalk.dim(`   Exact: ${result.exact_datetime}`));
+  if (result.location.city) {
+    lines.push(chalk.dim(`   Location: ${result.location.city}`));
+  }
+  if (result.lunar_phase) {
+    lines.push(chalk.dim(`   Moon Phase: ${result.lunar_phase.emoji} ${result.lunar_phase.name}`));
+  }
+  lines.push('');
+  
+  // Angles
+  lines.push(chalk.bold.cyan('── ANGLES ──'));
+  const ascColor = getZodiacColor(result.ascendant.sign);
+  const mcColor = getZodiacColor(result.midheaven.sign);
+  lines.push(`   ${COLORS.mars('ASC')}  ${ascColor(getZodiacSymbol(result.ascendant.sign) + ' ' + result.ascendant.sign)} ${chalk.white(formatDegrees(result.ascendant.position))}`);
+  lines.push(`   ${COLORS.sun('MC')}   ${mcColor(getZodiacSymbol(result.midheaven.sign) + ' ' + result.midheaven.sign)} ${chalk.white(formatDegrees(result.midheaven.position))}`);
+  lines.push('');
+  
+  // Planets
+  lines.push(chalk.bold.cyan('── PLANETS ──'));
+  const planetOrder = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+  for (const name of planetOrder) {
+    const planet = result.planets[name];
+    if (planet) {
+      const pColor = getPlanetColor(name);
+      const zColor = getZodiacColor(planet.sign);
+      const symbol = getPlanetSymbol(name);
+      const zodiac = getZodiacSymbol(planet.sign);
+      const deg = formatDegrees(planet.position);
+      const rx = planet.retrograde ? COLORS.mars(' ℞') : '';
+      const house = planet.house ? chalk.dim(` (${planet.house})`) : '';
+      lines.push(`   ${pColor(symbol)} ${name.padEnd(10)} ${zColor(zodiac + ' ' + planet.sign)} ${chalk.white(deg)}${rx}${house}`);
+    }
+  }
+  lines.push('');
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format lunar return result
+ */
+export function formatLunarReturn(result: LunarReturnResult): string {
+  const lines: string[] = [];
+  
+  lines.push(chalk.bold.white(`\n☽ Lunar Return`));
+  lines.push(chalk.dim(`   Natal: ${result.natal_date}`));
+  lines.push(chalk.dim(`   Natal Moon: ${getZodiacSymbol(result.natal_moon.sign)} ${result.natal_moon.sign} ${formatDegrees(result.natal_moon.position)}`));
+  lines.push(chalk.dim(`   Search from: ${result.search_from}`));
+  lines.push(chalk.green(`   Exact: ${result.exact_datetime}`));
+  if (result.location.city) {
+    lines.push(chalk.dim(`   Location: ${result.location.city}`));
+  }
+  lines.push('');
+  
+  // Angles
+  lines.push(chalk.bold.cyan('── ANGLES ──'));
+  const ascColor = getZodiacColor(result.ascendant.sign);
+  const mcColor = getZodiacColor(result.midheaven.sign);
+  lines.push(`   ${COLORS.mars('ASC')}  ${ascColor(getZodiacSymbol(result.ascendant.sign) + ' ' + result.ascendant.sign)} ${chalk.white(formatDegrees(result.ascendant.position))}`);
+  lines.push(`   ${COLORS.sun('MC')}   ${mcColor(getZodiacSymbol(result.midheaven.sign) + ' ' + result.midheaven.sign)} ${chalk.white(formatDegrees(result.midheaven.position))}`);
+  lines.push('');
+  
+  // Planets
+  lines.push(chalk.bold.cyan('── PLANETS ──'));
+  const planetOrder = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+  for (const name of planetOrder) {
+    const planet = result.planets[name];
+    if (planet) {
+      const pColor = getPlanetColor(name);
+      const zColor = getZodiacColor(planet.sign);
+      const symbol = getPlanetSymbol(name);
+      const zodiac = getZodiacSymbol(planet.sign);
+      const deg = formatDegrees(planet.position);
+      const rx = planet.retrograde ? COLORS.mars(' ℞') : '';
+      const house = planet.house ? chalk.dim(` (${planet.house})`) : '';
+      lines.push(`   ${pColor(symbol)} ${name.padEnd(10)} ${zColor(zodiac + ' ' + planet.sign)} ${chalk.white(deg)}${rx}${house}`);
+    }
+  }
+  lines.push('');
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format synastry result
+ */
+export function formatSynastry(result: SynastryResult): string {
+  const lines: string[] = [];
+  
+  lines.push(chalk.bold.white(`\n💑 Synastry`));
+  lines.push(chalk.dim(`   ${result.person1.name} (${result.person1.date})`));
+  lines.push(chalk.dim(`   ${result.person2.name} (${result.person2.date})`));
+  lines.push(chalk.dim(`   Aspects found: ${result.aspect_count}`));
+  lines.push('');
+  
+  // Key planetary positions comparison
+  lines.push(chalk.bold.cyan('── KEY POSITIONS ──'));
+  lines.push(chalk.dim(`       ${result.person1.name.slice(0, 10).padEnd(12)}  ${result.person2.name.slice(0, 10).padEnd(12)}`));
+  
+  const planetOrder = ['sun', 'moon', 'mercury', 'venus', 'mars'];
+  for (const name of planetOrder) {
+    const p1 = result.person1.planets[name];
+    const p2 = result.person2.planets[name];
+    if (p1 && p2) {
+      const pColor = getPlanetColor(name);
+      const symbol = getPlanetSymbol(name);
+      const z1Color = getZodiacColor(p1.sign);
+      const z2Color = getZodiacColor(p2.sign);
+      lines.push(`   ${pColor(symbol)}  ${z1Color(p1.sign)} ${formatDegrees(p1.position).padEnd(7)}  ${z2Color(p2.sign)} ${formatDegrees(p2.position)}`);
+    }
+  }
+  lines.push('');
+  
+  // Inter-chart aspects
+  lines.push(chalk.bold.cyan('── SYNASTRY ASPECTS ──'));
+  if (result.aspects.length === 0) {
+    lines.push(chalk.dim('   No aspects within orb'));
+  } else {
+    for (const asp of result.aspects.slice(0, 20)) {
+      const p1Name = asp.planet1.toLowerCase().replace(/ /g, '_');
+      const p2Name = asp.planet2.toLowerCase().replace(/ /g, '_');
+      const p1Color = getPlanetColor(p1Name);
+      const p2Color = getPlanetColor(p2Name);
+      const p1Sym = getPlanetSymbol(p1Name);
+      const p2Sym = getPlanetSymbol(p2Name);
+      const aSym = getAspectSymbol(asp.aspect);
+      const aColor = getAspectColor(asp.aspect);
+      const aspectName = asp.aspect.charAt(0).toUpperCase() + asp.aspect.slice(1);
+      lines.push(`   ${p1Color(p1Sym)} ${asp.planet1.slice(0, 8).padEnd(8)} ${aColor(aSym)} ${aColor(aspectName.slice(0, 6).padEnd(6))} ${p2Color(p2Sym)} ${asp.planet2.slice(0, 8).padEnd(8)} ${chalk.dim(asp.orb.toFixed(2) + '°')}`);
+    }
+  }
+  lines.push('');
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format progressions result
+ */
+export function formatProgressions(result: ProgressionsResult): string {
+  const lines: string[] = [];
+  
+  lines.push(chalk.bold.white(`\n🌙 Secondary Progressions`));
+  lines.push(chalk.dim(`   Method: ${result.method}`));
+  lines.push(chalk.dim(`   Natal: ${result.natal_date}`));
+  lines.push(chalk.dim(`   Target: ${result.target_date} (age ${result.age_at_target})`));
+  lines.push(chalk.dim(`   Progressed date: ${result.progressed_date}`));
+  lines.push('');
+  
+  // Progressed Angles
+  lines.push(chalk.bold.cyan('── PROGRESSED ANGLES ──'));
+  const ascColor = getZodiacColor(result.progressed_ascendant.sign);
+  const mcColor = getZodiacColor(result.progressed_midheaven.sign);
+  lines.push(`   ${COLORS.mars('ASC')}  ${ascColor(getZodiacSymbol(result.progressed_ascendant.sign) + ' ' + result.progressed_ascendant.sign)} ${chalk.white(formatDegrees(result.progressed_ascendant.position))}`);
+  lines.push(`   ${COLORS.sun('MC')}   ${mcColor(getZodiacSymbol(result.progressed_midheaven.sign) + ' ' + result.progressed_midheaven.sign)} ${chalk.white(formatDegrees(result.progressed_midheaven.position))}`);
+  lines.push('');
+  
+  // Progressed planets comparison
+  lines.push(chalk.bold.cyan('── PROGRESSED vs NATAL ──'));
+  lines.push(chalk.dim('       PROGRESSED      NATAL'));
+  
+  const planetOrder = ['sun', 'moon', 'mercury', 'venus', 'mars'];
+  for (const name of planetOrder) {
+    const prog = result.progressed_planets[name];
+    const natal = result.natal_planets[name];
+    if (prog && natal) {
+      const pColor = getPlanetColor(name);
+      const symbol = getPlanetSymbol(name);
+      const pZColor = getZodiacColor(prog.sign);
+      const nZColor = getZodiacColor(natal.sign);
+      const rx = prog.retrograde ? COLORS.mars('℞') : ' ';
+      lines.push(`   ${pColor(symbol)}  ${pZColor(prog.sign)} ${formatDegrees(prog.position).padEnd(7)}${rx} ${nZColor(natal.sign)} ${formatDegrees(natal.position)}`);
+    }
+  }
+  lines.push('');
+  
+  // Progressed-to-natal aspects
+  if (result.progressed_to_natal_aspects.length > 0) {
+    lines.push(chalk.bold.cyan('── PROGRESSED → NATAL ASPECTS ──'));
+    for (const asp of result.progressed_to_natal_aspects.slice(0, 10)) {
+      const pName = asp.progressed.toLowerCase().replace(/ /g, '_');
+      const nName = asp.natal.toLowerCase().replace(/ /g, '_');
+      const pColor = getPlanetColor(pName);
+      const nColor = getPlanetColor(nName);
+      const pSym = getPlanetSymbol(pName);
+      const nSym = getPlanetSymbol(nName);
+      const aSym = getAspectSymbol(asp.aspect);
+      const aColor = getAspectColor(asp.aspect);
+      lines.push(`   ${pColor(pSym)} ${asp.progressed.slice(0, 8).padEnd(8)} ${aColor(aSym)} ${nColor(nSym)} ${asp.natal.slice(0, 8).padEnd(8)} ${chalk.dim(asp.orb.toFixed(2) + '°')}`);
+    }
+    lines.push('');
+  }
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format ephemeris range result
+ */
+export function formatEphemerisRange(result: EphemerisRangeResult): string {
+  const lines: string[] = [];
+  
+  const pColor = getPlanetColor(result.body);
+  const symbol = getPlanetSymbol(result.body);
+  
+  lines.push(chalk.bold.white(`\n${pColor(symbol)} ${result.body.charAt(0).toUpperCase() + result.body.slice(1)} Ephemeris`));
+  lines.push(chalk.dim(`   ${result.range.start} → ${result.range.end} (${result.range.step})`));
+  lines.push('');
+  
+  // Sign changes
+  if (result.sign_changes.length > 0) {
+    lines.push(chalk.bold.cyan('── SIGN CHANGES ──'));
+    for (const change of result.sign_changes) {
+      const fromColor = getZodiacColor(change.from);
+      const toColor = getZodiacColor(change.to);
+      lines.push(`   ${chalk.white(change.date)}  ${fromColor(getZodiacSymbol(change.from) + ' ' + change.from)} → ${toColor(getZodiacSymbol(change.to) + ' ' + change.to)}`);
+    }
+    lines.push('');
+  }
+  
+  // Retrograde stations
+  if (result.retrograde_stations.length > 0) {
+    lines.push(chalk.bold.cyan('── RETROGRADE STATIONS ──'));
+    for (const station of result.retrograde_stations) {
+      const zColor = getZodiacColor(station.sign);
+      const stationType = station.station === 'retrograde' ? COLORS.mars('℞ RETRO') : COLORS.jupiter('⮕ DIRECT');
+      lines.push(`   ${chalk.white(station.date)}  ${stationType}  ${zColor(station.sign)} ${formatDegrees(station.position)}`);
+    }
+    lines.push('');
+  }
+  
+  // Positions (condensed)
+  lines.push(chalk.bold.cyan('── POSITIONS ──'));
+  for (const pos of result.positions) {
+    const zColor = getZodiacColor(pos.sign);
+    const rx = pos.retrograde ? COLORS.mars(' ℞') : '';
+    lines.push(`   ${chalk.dim(pos.date)}  ${zColor(getZodiacSymbol(pos.sign) + ' ' + pos.sign)} ${chalk.white(formatDegrees(pos.position))}${rx}`);
+  }
+  lines.push('');
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format composite chart result
+ */
+export function formatComposite(result: CompositeResult): string {
+  const lines: string[] = [];
+  
+  lines.push(chalk.bold.white(`\n🔮 Composite Chart`));
+  lines.push(chalk.dim(`   ${result.person1.name} + ${result.person2.name}`));
+  lines.push(chalk.dim(`   Method: ${result.method}`));
+  lines.push('');
+  
+  // Angles
+  lines.push(chalk.bold.cyan('── COMPOSITE ANGLES ──'));
+  const ascColor = getZodiacColor(result.ascendant.sign);
+  const mcColor = getZodiacColor(result.midheaven.sign);
+  lines.push(`   ${COLORS.mars('ASC')}  ${ascColor(getZodiacSymbol(result.ascendant.sign) + ' ' + result.ascendant.sign)} ${chalk.white(formatDegrees(result.ascendant.position))}`);
+  lines.push(`   ${COLORS.sun('MC')}   ${mcColor(getZodiacSymbol(result.midheaven.sign) + ' ' + result.midheaven.sign)} ${chalk.white(formatDegrees(result.midheaven.position))}`);
+  lines.push('');
+  
+  // Planets
+  lines.push(chalk.bold.cyan('── COMPOSITE PLANETS ──'));
+  const planetOrder = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+  for (const name of planetOrder) {
+    const planet = result.planets[name];
+    if (planet) {
+      const pColor = getPlanetColor(name);
+      const zColor = getZodiacColor(planet.sign);
+      const symbol = getPlanetSymbol(name);
+      const zodiac = getZodiacSymbol(planet.sign);
+      const deg = formatDegrees(planet.position);
+      const house = planet.house ? chalk.dim(` (${planet.house})`) : '';
+      lines.push(`   ${pColor(symbol)} ${name.padEnd(10)} ${zColor(zodiac + ' ' + planet.sign)} ${chalk.white(deg)}${house}`);
+    }
+  }
+  lines.push('');
+  
+  lines.push(chalk.dim('   The composite chart represents the relationship as its own entity.'));
+  lines.push(chalk.dim('   Each planet is the midpoint between both individuals\' placements.'));
+  lines.push('');
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format solar arc directions result
+ */
+export function formatSolarArc(result: SolarArcResult): string {
+  const lines: string[] = [];
+  
+  lines.push(chalk.bold.white(`\n☀️ Solar Arc Directions`));
+  lines.push(chalk.dim(`   Method: ${result.method}`));
+  lines.push(chalk.dim(`   Natal: ${result.natal_date}`));
+  lines.push(chalk.dim(`   Target: ${result.target_date} (age ${result.age_at_target})`));
+  lines.push(chalk.green(`   Solar Arc: ${result.solar_arc.toFixed(2)}°`));
+  lines.push('');
+  
+  // Directed Angles
+  lines.push(chalk.bold.cyan('── DIRECTED ANGLES ──'));
+  const ascColor = getZodiacColor(result.directed_ascendant.sign);
+  const mcColor = getZodiacColor(result.directed_midheaven.sign);
+  lines.push(`   ${COLORS.mars('ASC')}  ${ascColor(getZodiacSymbol(result.directed_ascendant.sign) + ' ' + result.directed_ascendant.sign)} ${chalk.white(formatDegrees(result.directed_ascendant.position))} ${chalk.dim(`← ${result.directed_ascendant.natal_sign} ${formatDegrees(result.directed_ascendant.natal_position)}`)}`);
+  lines.push(`   ${COLORS.sun('MC')}   ${mcColor(getZodiacSymbol(result.directed_midheaven.sign) + ' ' + result.directed_midheaven.sign)} ${chalk.white(formatDegrees(result.directed_midheaven.position))} ${chalk.dim(`← ${result.directed_midheaven.natal_sign} ${formatDegrees(result.directed_midheaven.natal_position)}`)}`);
+  lines.push('');
+  
+  // Directed planets
+  lines.push(chalk.bold.cyan('── DIRECTED PLANETS ──'));
+  lines.push(chalk.dim('       DIRECTED        ← NATAL'));
+  
+  const planetOrder = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+  for (const name of planetOrder) {
+    const planet = result.directed_planets[name];
+    if (planet) {
+      const pColor = getPlanetColor(name);
+      const symbol = getPlanetSymbol(name);
+      const dZColor = getZodiacColor(planet.sign);
+      const nZColor = getZodiacColor(planet.natal_sign);
+      lines.push(`   ${pColor(symbol)}  ${dZColor(planet.sign)} ${formatDegrees(planet.position).padEnd(7)} ← ${nZColor(planet.natal_sign)} ${formatDegrees(planet.natal_position)}`);
+    }
+  }
+  lines.push('');
+  
+  // Directed-to-natal aspects
+  if (result.directed_to_natal_aspects.length > 0) {
+    lines.push(chalk.bold.cyan('── DIRECTED → NATAL ASPECTS ──'));
+    for (const asp of result.directed_to_natal_aspects.slice(0, 15)) {
+      const dName = asp.directed.toLowerCase();
+      const nName = asp.natal.toLowerCase();
+      const dColor = getPlanetColor(dName);
+      const nColor = getPlanetColor(nName);
+      const dSym = getPlanetSymbol(dName);
+      const nSym = getPlanetSymbol(nName);
+      const aSym = getAspectSymbol(asp.aspect);
+      const aColor = getAspectColor(asp.aspect);
+      lines.push(`   ${dColor(dSym)} ${asp.directed.slice(0, 7).padEnd(7)} ${aColor(aSym)} ${nColor(nSym)} ${asp.natal.slice(0, 7).padEnd(7)} ${chalk.dim(asp.orb.toFixed(2) + '°')}`);
+    }
+    lines.push('');
+  }
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format horary chart result
+ */
+export function formatHorary(result: HoraryResult): string {
+  const lines: string[] = [];
+  
+  lines.push(chalk.bold.white(`\n🔮 HORARY CHART`));
+  lines.push(chalk.bold.yellow(`   "${result.question}"`));
+  lines.push('');
+  lines.push(chalk.dim(`   Cast: ${result.cast_time.datetime}`));
+  if (result.cast_time.city) {
+    lines.push(chalk.dim(`   Location: ${result.cast_time.city}`));
+  }
+  lines.push(chalk.dim(`   Planetary Hour: ${result.planetary_hour} | Day Ruler: ${result.day_ruler}`));
+  lines.push('');
+  
+  // Strictures (warnings)
+  if (result.strictures.length > 0) {
+    lines.push(chalk.bold.red('⚠️  STRICTURES AGAINST JUDGMENT'));
+    for (const stricture of result.strictures) {
+      lines.push(chalk.red(`   • ${stricture}`));
+    }
+    lines.push('');
+  }
+  
+  // Querent (1st house ruler)
+  lines.push(chalk.bold.cyan('── THE QUERENT ──'));
+  const qRuler = result.querent.ruler.toLowerCase();
+  const qColor = getPlanetColor(qRuler);
+  const qZColor = getZodiacColor(result.querent.sign);
+  const qPosZColor = getZodiacColor(result.querent.ruler_position.sign);
+  lines.push(`   Ascendant: ${qZColor(getZodiacSymbol(result.querent.sign) + ' ' + result.querent.sign)} ${formatDegrees(result.ascendant.position)}`);
+  lines.push(`   You are signified by: ${qColor(getPlanetSymbol(qRuler) + ' ' + result.querent.ruler)}`);
+  const rx = result.querent.ruler_position.retrograde ? COLORS.mars(' ℞') : '';
+  lines.push(`   ${result.querent.ruler} is in: ${qPosZColor(result.querent.ruler_position.sign)} ${formatDegrees(result.querent.ruler_position.position)}${rx}`);
+  if (result.querent.ruler_position.house) {
+    lines.push(`   ${result.querent.ruler} is in: ${chalk.white(result.querent.ruler_position.house)}`);
+  }
+  lines.push('');
+  
+  // Moon (co-significator and key to events)
+  lines.push(chalk.bold.cyan('── THE MOON ──'));
+  const moonZColor = getZodiacColor(result.moon.sign);
+  lines.push(`   ${COLORS.moon('☽')} Moon in ${moonZColor(getZodiacSymbol(result.moon.sign) + ' ' + result.moon.sign)} ${formatDegrees(result.moon.position)}`);
+  if (result.moon.house) {
+    lines.push(`   House: ${chalk.white(result.moon.house)}`);
+  }
+  
+  if (result.moon.void_of_course) {
+    lines.push(`   ${chalk.red('⚠️  VOID OF COURSE')} — ${chalk.dim(`${result.moon.degrees_until_sign_change.toFixed(1)}° until sign change`)}`);
+    lines.push(chalk.dim('   (Nothing may come of the matter, or outcome is already fated)'));
+  } else {
+    lines.push(`   ${chalk.green('Moon is active')} — ${chalk.dim(`${result.moon.degrees_until_sign_change.toFixed(1)}° until sign change`)}`);
+  }
+  
+  // Moon aspects
+  if (result.moon.aspects.length > 0) {
+    lines.push('');
+    lines.push(chalk.dim('   Moon aspects:'));
+    for (const asp of result.moon.aspects.slice(0, 5)) {
+      const pColor = getPlanetColor(asp.planet.toLowerCase());
+      const aSym = getAspectSymbol(asp.aspect);
+      const applying = asp.applying ? chalk.green('→ applying') : chalk.dim('← separating');
+      lines.push(`   ${COLORS.moon('☽')} ${aSym} ${pColor(asp.planet.padEnd(8))} ${chalk.dim(asp.orb.toFixed(2) + '°')} ${applying}`);
+    }
+  }
+  lines.push('');
+  
+  // Houses table (key for identifying quesited)
+  lines.push(chalk.bold.cyan('── HOUSES ──'));
+  lines.push(chalk.dim('   Use these to identify the quesited (thing asked about):'));
+  lines.push('');
+  
+  const importantHouses = ['1', '2', '5', '7', '10', '11'];
+  for (const num of importantHouses) {
+    const house = result.houses[num];
+    if (house) {
+      const hZColor = getZodiacColor(house.sign);
+      const ruler = house.ruler.toLowerCase();
+      const rColor = getPlanetColor(ruler);
+      lines.push(`   ${chalk.bold(num.padStart(2))}H  ${hZColor(getZodiacSymbol(house.sign))} ${house.sign.padEnd(3)} → ${rColor(house.ruler.padEnd(7))}  ${chalk.dim(house.topic)}`);
+    }
+  }
+  lines.push(chalk.dim('   ... (other houses available in JSON output)'));
+  lines.push('');
+  
+  // Key planets
+  lines.push(chalk.bold.cyan('── KEY PLANETS ──'));
+  const keyPlanets = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'];
+  for (const name of keyPlanets) {
+    const planet = result.planets[name];
+    if (planet) {
+      const pColor = getPlanetColor(name);
+      const zColor = getZodiacColor(planet.sign);
+      const symbol = getPlanetSymbol(name);
+      const deg = formatDegrees(planet.position);
+      const rx = planet.retrograde ? COLORS.mars(' ℞') : '';
+      const house = planet.house ? chalk.dim(` (${planet.house})`) : '';
+      lines.push(`   ${pColor(symbol)} ${name.padEnd(8)} ${zColor(planet.sign)} ${deg}${rx}${house}`);
+    }
+  }
+  lines.push('');
+  
+  // Interpretation guidance
+  lines.push(chalk.bold.cyan('── HOW TO READ ──'));
+  lines.push(chalk.dim('   1. Identify the quesited\'s house (what you\'re asking about)'));
+  lines.push(chalk.dim('   2. Find that house\'s ruler (the significator)'));
+  lines.push(chalk.dim('   3. Look for aspects between querent\'s ruler and quesited\'s ruler'));
+  lines.push(chalk.dim('   4. Applying aspects = future contact; Separating = past'));
+  lines.push(chalk.dim('   5. Moon\'s next aspect often shows the outcome'));
   lines.push('');
   
   return lines.join('\n');
