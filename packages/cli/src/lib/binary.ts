@@ -56,12 +56,12 @@ export function getBinaryPath(): string {
   
   // Look in various locations
   const possiblePaths = [
-    // Installed via npm (production)
+    // Installed via npm (production) - dist/ is one level down from package root
+    join(__dirname, '..', 'bin', platformKey, binaryName),
+    // Installed via npm (alt path)
     join(__dirname, '..', '..', 'bin', platformKey, binaryName),
     // Development (monorepo)
-    join(__dirname, '..', '..', '..', '..', 'bin', platformKey, binaryName),
-    // Local development
-    join(__dirname, '..', '..', 'bin', binaryName),
+    join(__dirname, '..', '..', '..', 'bin', platformKey, binaryName),
   ];
   
   for (const p of possiblePaths) {
