@@ -8,18 +8,19 @@ A powerful astrological calculation CLI built on [Kerykeion](https://github.com/
 
 - **Natal Charts** — Full birth charts with planets, houses, aspects, and balances
 - **Transits** — Current planetary positions relative to your natal chart
-- **Solar Returns** — Annual return charts for year-ahead forecasting
-- **Lunar Returns** — Monthly return charts for emotional weather
-- **Synastry** — Relationship compatibility aspects between two charts
-- **Progressions** — Secondary progressions (day-for-a-year method)
-- **Ephemeris Range** — Track planetary positions over time with ingresses and stations
-- **Moon Phases** — Current lunar phase and position
+- **Solar Returns** — Annual birthday charts for year-ahead themes
+- **Lunar Returns** — Monthly emotional cycle charts
+- **Synastry** — Relationship compatibility between two charts
+- **Composite Charts** — Merged relationship chart (midpoint method)
+- **Progressions** — Secondary progressions (day-for-a-year)
+- **Solar Arc** — Solar arc directions for timing
+- **Horary** — Question-based divination charts with traditional rules
 - **Ephemeris** — Position of any celestial body on any date
-- **SVG Charts** — Beautiful wheel charts for all chart types
+- **Ephemeris Range** — Track a planet through signs over time
+- **Moon Phases** — Current lunar phase and position
 - **Symbol Reference** — Complete guide to astrological symbols and meanings
-- **Kabbalistic Colors** — Sephirotic color correspondences throughout
+- **Sephirotic Colors** — Kabbalistic color correspondences throughout
 - **JSON Output** — Machine-readable output for AI/automation
-- **City Geocoding** — Use city names instead of coordinates
 
 ## Installation
 
@@ -27,100 +28,215 @@ A powerful astrological calculation CLI built on [Kerykeion](https://github.com/
 npm install -g thoth-cli
 ```
 
-**Requirements:**
-- Node.js 18+
-- Python 3.10+
-
-The Python core (Kerykeion) installs automatically.
+The binary downloads automatically on first install (~18MB).
 
 ## Quick Start
 
 ```bash
-# Calculate a natal chart
-thoth chart --date 1879-03-14 --time 11:30 --city "Ulm" --nation "DE" --name "Einstein"
+# Natal chart
+thoth chart --date 1991-07-08 --time 14:06 --city "New York"
 
-# Get current transits to a natal chart
-thoth transit --natal-date 1879-03-14 --natal-time 11:30 --city "Ulm" --nation "DE"
+# Current transits
+thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "New York"
 
-# Current moon phase
+# Solar return for 2026
+thoth solar-return --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --year 2026
+
+# Horary divination
+thoth horary --question "Should I take the job?" --city "New York"
+
+# Relationship synastry
+thoth synastry --date1 1991-07-08 --time1 14:06 --city1 "NYC" \
+               --date2 1990-03-15 --time2 09:30 --city2 "LA"
+
+# Moon phase
 thoth moon
 
-# Where is Pluto right now?
+# Where is Pluto?
 thoth ephemeris --body pluto
 
-# Symbol reference guide
+# Symbol reference
 thoth key
 ```
 
+---
+
 ## Commands
 
-### `thoth chart`
+### `thoth chart` — Natal Chart
 
-Calculate a natal chart.
+Calculate a complete birth chart.
 
 ```bash
-thoth chart --date 1879-03-14 --time 11:30 --city "Ulm" --nation "DE" --name "Einstein"
+thoth chart --date 1991-07-08 --time 14:06 --city "New York"
+thoth chart --date 1991-07-08 --time 14:06 --lat 40.7128 --lng -74.0060
+thoth chart --date 1991-07-08 --time 14:06 --city "New York" --svg-file chart.svg
 ```
 
-**Options:**
 | Flag | Description | Required |
 |------|-------------|----------|
 | `--date` | Birth date (YYYY-MM-DD) | Yes |
 | `--time` | Birth time (HH:MM) | Yes |
 | `--city` | City name | Yes* |
-| `--nation` | Country code (US, UK, DE, etc.) | No (default: US) |
-| `--lat` | Latitude | Yes* |
-| `--lng` | Longitude | Yes* |
+| `--nation` | Country code (default: US) | No |
+| `--lat` / `--lng` | Coordinates | Yes* |
 | `--name` | Name for the chart | No |
+| `--svg` | Output SVG chart | No |
+| `--svg-file` | Save SVG to file | No |
 | `--json` | Output raw JSON | No |
 
 *Either `--city` or both `--lat` and `--lng` required.
 
-**Output includes:**
-- Ascendant and Midheaven
-- All 10 planets + Chiron, Lilith, Nodes
-- House placements
-- All 12 house cusps
-- Element balance (Fire/Earth/Air/Water)
-- Modality balance (Cardinal/Fixed/Mutable)
-- Top 15 natal aspects
-- Lunar phase at birth
-
 ---
 
-### `thoth transit`
+### `thoth transit` — Current Transits
 
-Calculate current transits to a natal chart.
+Calculate transits to a natal chart.
 
 ```bash
-thoth transit --natal-date 1879-03-14 --natal-time 11:30 --city "Ulm" --nation "DE"
-thoth transit --natal-date 1879-03-14 --natal-time 11:30 --city "Ulm" --nation "DE" --orb 1
-thoth transit --natal-date 1879-03-14 --natal-time 11:30 --city "Ulm" --nation "DE" --transit-date 2027-01-15
+thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "New York"
+thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" --orb 1
 ```
 
-**Options:**
 | Flag | Description | Required |
 |------|-------------|----------|
-| `--natal-date` | Birth date (YYYY-MM-DD) | Yes |
-| `--natal-time` | Birth time (HH:MM) | Yes |
+| `--natal-date` | Birth date | Yes |
+| `--natal-time` | Birth time | Yes |
 | `--city` | City name | Yes* |
-| `--nation` | Country code | No (default: US) |
 | `--lat` / `--lng` | Coordinates | Yes* |
 | `--transit-date` | Transit date (default: today) | No |
 | `--orb` | Aspect orb in degrees (default: 3) | No |
 | `--json` | Output raw JSON | No |
 
-**Output includes:**
-- Current sky (all planets with signs, degrees, houses)
-- Side-by-side house comparison (transit vs natal)
-- Transit-to-natal aspects with orbs
-- House flow notation (e.g., 2H→4H)
-- Current lunar phase
-- Retrograde indicators
+---
+
+### `thoth solar-return` — Annual Chart
+
+Calculate solar return chart for a specific year.
+
+```bash
+thoth solar-return --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" --year 2026
+```
+
+| Flag | Description | Required |
+|------|-------------|----------|
+| `--natal-date` | Birth date | Yes |
+| `--natal-time` | Birth time | Yes |
+| `--city` | City name | Yes |
+| `--year` | Return year | Yes |
+| `--json` | Output raw JSON | No |
 
 ---
 
-### `thoth moon`
+### `thoth lunar-return` — Monthly Chart
+
+Calculate next lunar return from a given date.
+
+```bash
+thoth lunar-return --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" --from 2026-03-01
+```
+
+| Flag | Description | Required |
+|------|-------------|----------|
+| `--natal-date` | Birth date | Yes |
+| `--natal-time` | Birth time | Yes |
+| `--city` | City name | Yes |
+| `--from` | Date to search from | Yes |
+| `--json` | Output raw JSON | No |
+
+---
+
+### `thoth synastry` — Relationship Aspects
+
+Calculate synastry aspects between two charts.
+
+```bash
+thoth synastry --date1 1991-07-08 --time1 14:06 --city1 "NYC" \
+               --date2 1990-03-15 --time2 09:30 --city2 "LA"
+```
+
+| Flag | Description | Required |
+|------|-------------|----------|
+| `--date1` / `--time1` | Person 1 birth data | Yes |
+| `--city1` or `--lat1/--lng1` | Person 1 location | Yes |
+| `--date2` / `--time2` | Person 2 birth data | Yes |
+| `--city2` or `--lat2/--lng2` | Person 2 location | Yes |
+| `--orb` | Aspect orb (default: 6) | No |
+| `--json` | Output raw JSON | No |
+
+---
+
+### `thoth composite` — Relationship Chart
+
+Calculate composite (midpoint) chart for a relationship.
+
+```bash
+thoth composite --date1 1991-07-08 --time1 14:06 --city1 "NYC" \
+                --date2 1990-03-15 --time2 09:30 --city2 "LA"
+```
+
+Same options as synastry. Creates a merged chart representing the relationship itself.
+
+---
+
+### `thoth progressions` — Secondary Progressions
+
+Calculate secondary progressions (day-for-a-year method).
+
+```bash
+thoth progressions --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" \
+                   --target-date 2026-03-01
+```
+
+| Flag | Description | Required |
+|------|-------------|----------|
+| `--natal-date` | Birth date | Yes |
+| `--natal-time` | Birth time | Yes |
+| `--city` or `--lat/--lng` | Birth location | Yes |
+| `--target-date` | Progression target date | Yes |
+| `--json` | Output raw JSON | No |
+
+---
+
+### `thoth solar-arc` — Solar Arc Directions
+
+Calculate solar arc directions (all planets advance by Sun's arc).
+
+```bash
+thoth solar-arc --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" \
+                --target-date 2026-03-01
+```
+
+Same options as progressions. Shows directed positions and aspects to natal.
+
+---
+
+### `thoth horary` — Question Divination
+
+Cast a horary chart for yes/no or situational questions.
+
+```bash
+thoth horary --question "Should I take the job?" --city "New York"
+thoth horary --question "Will we reconcile?" --lat 40.7128 --lng -74.0060
+```
+
+| Flag | Description | Required |
+|------|-------------|----------|
+| `--question` | Your question | Yes |
+| `--city` or `--lat/--lng` | Your current location | Yes |
+| `--json` | Output raw JSON | No |
+
+**Output includes:**
+- Planetary hour and day ruler
+- Strictures against judgment (void of course, etc.)
+- Querent significator (1st house ruler)
+- Quesited significator (relevant house ruler)
+- Moon's last and next aspects
+- Reception and dignity analysis
+
+---
+
+### `thoth moon` — Lunar Phase
 
 Get current moon phase and position.
 
@@ -129,15 +245,9 @@ thoth moon
 thoth moon --date 2026-03-14
 ```
 
-**Options:**
-| Flag | Description |
-|------|-------------|
-| `--date` | Date (default: today) |
-| `--json` | Output raw JSON |
-
 ---
 
-### `thoth ephemeris`
+### `thoth ephemeris` — Planet Position
 
 Get the position of any celestial body.
 
@@ -146,182 +256,49 @@ thoth ephemeris --body pluto
 thoth ephemeris --body saturn --date 2027-01-15
 ```
 
-**Options:**
-| Flag | Description | Required |
-|------|-------------|----------|
-| `--body` | Celestial body (sun, moon, mercury, venus, mars, jupiter, saturn, uranus, neptune, pluto) | Yes |
-| `--date` | Date (default: today) | No |
-| `--json` | Output raw JSON | No |
+**Bodies:** sun, moon, mercury, venus, mars, jupiter, saturn, uranus, neptune, pluto
 
 ---
 
-### `thoth solar-return`
+### `thoth ephemeris-range` — Track Planet Over Time
 
-Calculate annual solar return chart.
-
-```bash
-thoth solar-return --natal-date 1879-03-14 --natal-time 11:30 --city "Ulm" --nation "DE" --year 2026
-thoth solar-return --natal-date 1879-03-14 --natal-time 11:30 --city "Ulm" --nation "DE" --year 2026 --svg-file chart.svg
-```
-
-**Options:**
-| Flag | Description | Required |
-|------|-------------|----------|
-| `--natal-date` | Birth date (YYYY-MM-DD) | Yes |
-| `--natal-time` | Birth time (HH:MM) | Yes |
-| `--year` | Return year | Yes |
-| `--city` | Natal city | Yes* |
-| `--nation` | Country code | No (default: US) |
-| `--return-city` | Location for return (default: natal) | No |
-| `--svg` | Output SVG chart | No |
-| `--svg-file` | Save SVG to file | No |
-| `--json` | Output raw JSON | No |
-
----
-
-### `thoth lunar-return`
-
-Calculate next lunar return from a date.
+Get ephemeris positions over a date range.
 
 ```bash
-thoth lunar-return --natal-date 1879-03-14 --natal-time 11:30 --city "Ulm" --nation "DE" --from 2026-03-01
+thoth ephemeris-range --body pluto --from 2024-01-01 --to 2030-01-01 --step month
 ```
 
-**Options:**
-| Flag | Description | Required |
-|------|-------------|----------|
-| `--natal-date` | Birth date (YYYY-MM-DD) | Yes |
-| `--natal-time` | Birth time (HH:MM) | Yes |
-| `--from` | Search from date (YYYY-MM-DD) | Yes |
-| `--city` | Natal city | Yes* |
-| `--nation` | Country code | No (default: US) |
-| `--return-city` | Location for return | No |
-| `--svg` / `--svg-file` | SVG output | No |
-| `--json` | Output raw JSON | No |
-
----
-
-### `thoth synastry`
-
-Calculate relationship aspects between two charts.
-
-```bash
-thoth synastry \
-  --date1 1879-03-14 --time1 11:30 --city1 "Ulm" --nation1 "DE" --name1 "Einstein" \
-  --date2 1876-01-01 --time2 12:00 --city2 "Berlin" --nation2 "DE" --name2 "Mileva"
-```
-
-**Options:**
-| Flag | Description | Required |
-|------|-------------|----------|
-| `--date1` | Person 1 birth date | Yes |
-| `--time1` | Person 1 birth time | Yes |
-| `--city1` | Person 1 city | Yes* |
-| `--name1` | Person 1 name | No |
-| `--date2` | Person 2 birth date | Yes |
-| `--time2` | Person 2 birth time | Yes |
-| `--city2` | Person 2 city | Yes* |
-| `--name2` | Person 2 name | No |
-| `--orb` | Aspect orb (default: 6) | No |
-| `--svg` / `--svg-file` | SVG bi-wheel | No |
-| `--json` | Output raw JSON | No |
-
----
-
-### `thoth progressions`
-
-Calculate secondary progressions (day-for-a-year method).
-
-```bash
-thoth progressions --natal-date 1879-03-14 --natal-time 11:30 --city "Ulm" --nation "DE" --target-date 1915-11-25
-```
-
-**Options:**
-| Flag | Description | Required |
-|------|-------------|----------|
-| `--natal-date` | Birth date (YYYY-MM-DD) | Yes |
-| `--natal-time` | Birth time (HH:MM) | Yes |
-| `--target-date` | Target date for progressions | Yes |
-| `--city` | Natal city | Yes* |
-| `--nation` | Country code | No (default: US) |
-| `--svg` / `--svg-file` | SVG output | No |
-| `--json` | Output raw JSON | No |
-
-**Output includes:**
-- Progressed angles (ASC, MC)
-- Progressed vs natal planet positions
-- Progressed-to-natal aspects (tight orb)
-- Age at target date
-
----
-
-### `thoth ephemeris-range`
-
-Track planetary positions over a date range.
-
-```bash
-thoth ephemeris-range --body pluto --from 2024-01-01 --to 2030-12-31 --step month
-thoth ephemeris-range --body saturn --from 2025-01-01 --to 2027-12-31 --step week
-```
-
-**Options:**
 | Flag | Description | Required |
 |------|-------------|----------|
 | `--body` | Celestial body | Yes |
-| `--from` | Start date (YYYY-MM-DD) | Yes |
-| `--to` | End date (YYYY-MM-DD) | Yes |
-| `--step` | Step: day, week, month (default: month) | No |
-| `--json` | Output raw JSON | No |
-
-**Output includes:**
-- All positions at each step
-- **Sign changes** — When the planet enters a new sign
-- **Retrograde stations** — When the planet stations Rx or direct
+| `--from` | Start date | Yes |
+| `--to` | End date | Yes |
+| `--step` | Interval: day, week, month | No (default: month) |
 
 ---
 
-### `thoth key`
+### `thoth key` — Symbol Reference
 
-Display the complete symbol reference guide.
+Display the complete astrological symbol reference.
 
 ```bash
 thoth key
 ```
 
-Includes:
-- **Planets** — Meanings, rulerships, Sephirotic correspondences
-- **Points** — Chiron, Lilith, Nodes
-- **Zodiac Signs** — Element, modality, ruler, mantra
-- **Houses** — Life areas for all 12 houses
-- **Aspects** — Degrees, meanings, Hermetic colors
-- **Elements** — Signs, temperaments, Jungian functions
-- **Modalities** — Cardinal, Fixed, Mutable
-- **Dignities** — Domicile, Exaltation, Detriment, Fall
-
----
-
-## SVG Chart Generation
-
-All chart commands support SVG output:
-
-```bash
-# Output SVG to stdout (as JSON)
-thoth chart --date 1879-03-14 --time 11:30 --city "Ulm" --nation "DE" --svg
-
-# Save SVG to file
-thoth chart --date 1879-03-14 --time 11:30 --city "Ulm" --nation "DE" --svg-file einstein.svg
-
-# Synastry bi-wheel
-thoth synastry --date1 1879-03-14 --time1 11:30 --city1 "Ulm" --date2 1876-01-01 --time2 12:00 --city2 "Berlin" --svg-file synastry.svg
-```
-
-Charts are rendered using Kerykeion's SVG engine.
+**Includes:**
+- Planets — meanings, rulerships, Sephirotic correspondences
+- Points — Chiron, Lilith, Nodes
+- Zodiac Signs — element, modality, ruler, "I AM" mantras
+- Houses — all 12 life areas
+- Aspects — degrees, meanings, orbs
+- Elements & Modalities
+- Dignities — domicile, exaltation, detriment, fall
 
 ---
 
 ## Color System
 
-thoth-cli uses a **Kabbalistic color system** based on Sephirotic correspondences:
+thoth-cli uses **Sephirotic colors** based on Kabbalistic correspondences:
 
 | Planet | Sephira | Color |
 |--------|---------|-------|
@@ -336,8 +313,6 @@ thoth-cli uses a **Kabbalistic color system** based on Sephirotic correspondence
 | ♆ Neptune | — | Sea Green |
 | ♇ Pluto | — | Dark Red |
 
-Zodiac signs inherit their ruling planet's color. Aspects inherit their corresponding Sephira's color.
-
 ---
 
 ## JSON Output
@@ -345,81 +320,54 @@ Zodiac signs inherit their ruling planet's color. Aspects inherit their correspo
 All commands support `--json` for programmatic use:
 
 ```bash
-thoth chart --date 1879-03-14 --time 11:30 --city "Ulm" --nation "DE" --json
+thoth chart --date 1991-07-08 --time 14:06 --city "NYC" --json
+thoth horary --question "Test" --city "NYC" --json
 ```
 
-Perfect for AI agents, automation, and integration with other tools.
+Perfect for AI agents, automation, and integration.
 
 ---
 
-## Examples
+## Privacy
 
-### Famous Charts
+**thoth-cli collects no data. Ever.**
 
-```bash
-# Albert Einstein — Pisces Sun, Sagittarius Moon
-thoth chart --date 1879-03-14 --time 11:30 --city "Ulm" --nation "DE" --name "Einstein"
-
-# Carl Jung — Leo Sun, Taurus Moon  
-thoth chart --date 1875-07-26 --time 19:29 --city "Kesswil" --nation "CH" --name "Jung"
-
-# Nikola Tesla — Cancer Sun, Libra Moon
-thoth chart --date 1856-07-10 --time 00:00 --city "Smiljan" --nation "HR" --name "Tesla"
-```
-
-### Transit Analysis
-
-```bash
-# Current transits with tight orb
-thoth transit --natal-date 1879-03-14 --natal-time 11:30 --city "Ulm" --nation "DE" --orb 1
-
-# Future transits
-thoth transit --natal-date 1879-03-14 --natal-time 11:30 --city "Ulm" --nation "DE" --transit-date 2027-01-15
-```
+- ✅ All calculations run locally
+- ✅ No analytics, no telemetry, no tracking
+- ✅ No network requests except city geocoding (via GeoNames)
+- ✅ Your birth data stays on your machine
 
 ---
 
-## Architecture
+## Environment Variables
 
-```
-thoth-cli/
-├── packages/
-│   ├── core/           # Python calculations (Kerykeion + Swiss Ephemeris)
-│   │   ├── thoth_core/
-│   │   │   ├── __init__.py
-│   │   │   └── cli.py
-│   │   └── pyproject.toml
-│   └── cli/            # TypeScript CLI (Commander.js)
-│       ├── src/
-│       │   ├── bin.ts
-│       │   └── lib/
-│       │       ├── core.ts
-│       │       └── format.ts
-│       └── package.json
-├── CHANGELOG.md
-└── README.md
-```
+| Variable | Purpose |
+|----------|---------|
+| `KERYKEION_GEONAMES_USERNAME` | Custom GeoNames username for geocoding (optional, avoids rate limits) |
+
+Get a free username at [geonames.org/login](https://www.geonames.org/login)
 
 ---
 
 ## Development
 
 ```bash
-# Clone
 git clone https://github.com/aklo360/thoth-cli.git
 cd thoth-cli
 
-# Install Python dependencies
+# Python core
 cd packages/core
+python -m venv .venv
+source .venv/bin/activate
 pip install -e .
 
-# Install TypeScript dependencies and build
+# TypeScript CLI
 cd ../cli
 npm install
 npm run build
 
-# Run locally
-node dist/bin.js chart --date 1879-03-14 --time 11:30 --city "Ulm" --nation "DE"
+# Test
+node dist/bin.js chart --date 1991-07-08 --time 14:06 --city "New York"
 ```
 
 ---
@@ -429,19 +377,6 @@ node dist/bin.js chart --date 1879-03-14 --time 11:30 --city "Ulm" --nation "DE"
 - [Kerykeion](https://github.com/g-battaglia/kerykeion) — Python astrology library
 - [Swiss Ephemeris](https://www.astro.com/swisseph/) — Precise planetary calculations
 - [Commander.js](https://github.com/tj/commander.js) — CLI framework
-
----
-
-## Privacy
-
-**thoth-cli collects no data. Ever.**
-
-- ✅ All calculations run locally on your machine
-- ✅ No analytics, no telemetry, no tracking
-- ✅ No network requests except geocoding (via Geonames)
-- ✅ Your birth data stays on your computer
-
-The oracle sees but does not record.
 
 ---
 
