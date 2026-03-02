@@ -80,7 +80,7 @@ EPHEMERIS & MOON
 REFERENCE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   thoth key                                           # full symbol reference`)
-  .version('0.2.13');
+  .version('0.2.14');
 
 // Chart command
 program
@@ -886,7 +886,7 @@ program
 
 // Banner
 console.log(chalk.dim(''));
-console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.13'));
+console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.14'));
 console.log(chalk.dim(''));
 
 program.parse();
