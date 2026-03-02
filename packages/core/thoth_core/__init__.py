@@ -5,4 +5,4 @@ Built on Swiss Ephemeris via Kerykeion
 𓅝 As above, so below. 𓅝
 """
 
-__version__ = "0.2.17"
+__version__ = "0.2.22"

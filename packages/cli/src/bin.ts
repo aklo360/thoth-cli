@@ -11,14 +11,16 @@ import { writeFileSync } from 'fs';
 import { 
   chart, transit, moon, ephemeris, version,
   solarReturn, lunarReturn, synastry, progressions, ephemerisRange,
-  composite, solarArc, horary, score, moonExtended, transitScan, ephemerisMulti
+  composite, solarArc, horary, score, moonExtended, transitScan, ephemerisMulti,
+  tarotDraw, tarotCard, tarotDeck, tarotSpreads
 } from './lib/core.js';
 import { 
   formatChart, formatTransits, formatMoon, formatEphemeris,
   formatSolarReturn, formatLunarReturn, formatSynastry, 
   formatProgressions, formatEphemerisRange,
   formatComposite, formatSolarArc, formatHorary,
-  formatScore, formatMoonExtended, formatTransitScan, formatEphemerisMulti
+  formatScore, formatMoonExtended, formatTransitScan, formatEphemerisMulti,
+  formatTarotDraw, formatTarotCard, formatTarotDeck, formatTarotSpreads
 } from './lib/format.js';
 import { isError } from './types.js';
 
@@ -1040,9 +1042,111 @@ program
     }
   });
 
+// ═══════════════════════════════════════════════════════════════
+// TAROT COMMANDS
+// ═══════════════════════════════════════════════════════════════
+
+// Tarot draw command
+program
+  .command('tarot')
+  .alias('draw')
+  .description('Draw tarot cards (cryptographic randomness)')
+  .option('-s, --spread <spread>', 'Spread: single, 3-card, celtic, horseshoe, relationship, decision', 'single')
+  .option('-q, --question <question>', 'Question for the reading')
+  .option('-n, --count <count>', 'Number of cards (for custom spread)', parseInt)
+  .option('--no-reversals', 'Disable reversed cards')
+  .option('--json', 'Output raw JSON')
+  .action(async (options) => {
+    const spinner = ora('Shuffling the deck...').start();
+    
+    const result = await tarotDraw({
+      spread: options.spread,
+      question: options.question,
+      count: options.count,
+      reversals: options.reversals,
+    });
+    
+    spinner.stop();
+    
+    if (isError(result)) {
+      console.error(chalk.red('Error: ' + result.error));
+      process.exit(1);
+    }
+    
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(formatTarotDraw(result));
+    }
+  });
+
+// Tarot card lookup
+program
+  .command('tarot-card <card>')
+  .alias('card')
+  .description('Look up a tarot card by name or number')
+  .option('--json', 'Output raw JSON')
+  .action(async (card, options) => {
+    const result = await tarotCard(card);
+    
+    if (isError(result)) {
+      console.error(chalk.red('Error: ' + result.error));
+      process.exit(1);
+    }
+    
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(formatTarotCard(result));
+    }
+  });
+
+// Tarot deck listing
+program
+  .command('tarot-deck')
+  .alias('deck')
+  .description('List tarot cards')
+  .option('-f, --filter <filter>', 'Filter: major, minor, wands, cups, swords, pentacles')
+  .option('--json', 'Output raw JSON')
+  .action(async (options) => {
+    const result = await tarotDeck(options.filter);
+    
+    if (isError(result)) {
+      console.error(chalk.red('Error: ' + result.error));
+      process.exit(1);
+    }
+    
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(formatTarotDeck(result));
+    }
+  });
+
+// Tarot spreads listing
+program
+  .command('tarot-spreads')
+  .alias('spreads')
+  .description('List available tarot spreads')
+  .option('--json', 'Output raw JSON')
+  .action(async (options) => {
+    const result = await tarotSpreads();
+    
+    if (isError(result)) {
+      console.error(chalk.red('Error: ' + result.error));
+      process.exit(1);
+    }
+    
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(formatTarotSpreads(result));
+    }
+  });
+
 // Banner
 console.log(chalk.dim(''));
-console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.21'));
+console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.22'));
 console.log(chalk.dim(''));
 
 program.parse();

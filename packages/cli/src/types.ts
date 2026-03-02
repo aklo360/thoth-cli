@@ -514,6 +514,66 @@ export function isError<T extends object>(result: ThothResult<T>): result is Tho
   return 'error' in result;
 }
 
+// Tarot Types
+export interface TarotCard {
+  number: number;
+  name: string;
+  arcana: 'major' | 'minor';
+  suit?: string;
+  rank?: string;
+  hebrew?: string;
+  path?: number;
+  element?: string;
+  planet?: string;
+  zodiac?: string;
+  domain?: string;
+  sephira?: string;
+  theme?: string;
+  keywords_upright: string[];
+  keywords_reversed: string[];
+  reversed?: boolean;
+  position?: number;
+  position_name?: string;
+}
+
+export interface TarotDrawResult {
+  type: string;
+  timestamp: string;
+  entropy_source: string;
+  question?: string;
+  spread: string;
+  spread_name: string;
+  cards: TarotCard[];
+  total_cards: number;
+}
+
+export interface TarotDrawOptions {
+  count?: number;
+  spread?: string;
+  question?: string;
+  reversals?: boolean;
+}
+
+export interface TarotDeckResult {
+  type: string;
+  filter?: string;
+  count: number;
+  cards: TarotCard[];
+}
+
+export interface TarotSpread {
+  id: string;
+  name: string;
+  count: number;
+  positions: string[];
+  description: string;
+}
+
+export interface TarotSpreadsResult {
+  type: string;
+  spreads: TarotSpread[];
+}
+
 // Score (Relationship Compatibility)
 export interface ScoreOptions {
   year1: number;

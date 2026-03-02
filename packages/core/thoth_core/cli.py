@@ -1612,6 +1612,101 @@ def ephemeris_multi(
         output_error(str(e))
 
 
+# ═══════════════════════════════════════════════════════════════
+# TAROT COMMANDS
+# ═══════════════════════════════════════════════════════════════
+
+@app.command("tarot-draw")
+def tarot_draw(
+    count: int = typer.Option(1, help="Number of cards to draw"),
+    spread: str = typer.Option("single", help="Spread type: single, 3-card, celtic, horseshoe, relationship, decision"),
+    question: Optional[str] = typer.Option(None, help="Question for the reading"),
+    no_reversals: bool = typer.Option(False, help="Disable reversed cards"),
+):
+    """Draw tarot cards with true randomness (cryptographic entropy)."""
+    try:
+        from .tarot import draw_cards, SPREADS
+        
+        # If spread specified, use its count
+        if spread in SPREADS:
+            count = SPREADS[spread]["count"]
+        
+        result = draw_cards(
+            count=count,
+            reversals=not no_reversals,
+            question=question,
+            spread=spread,
+        )
+        output_json(result)
+        
+    except Exception as e:
+        output_error(str(e))
+
+
+@app.command("tarot-card")
+def tarot_card(
+    identifier: str = typer.Argument(..., help="Card name or number (0-77)"),
+):
+    """Look up a specific tarot card."""
+    try:
+        from .tarot import get_card
+        
+        card = get_card(identifier)
+        if card is None:
+            output_error(f"Card not found: {identifier}")
+            return
+        
+        output_json(card)
+        
+    except Exception as e:
+        output_error(str(e))
+
+
+@app.command("tarot-deck")
+def tarot_deck(
+    filter_type: Optional[str] = typer.Option(None, "--filter", "-f", help="Filter: major, minor, wands, cups, swords, pentacles"),
+):
+    """List tarot cards."""
+    try:
+        from .tarot import get_deck
+        
+        cards = get_deck(filter_type)
+        output_json({
+            "type": "Tarot Deck",
+            "filter": filter_type,
+            "count": len(cards),
+            "cards": cards,
+        })
+        
+    except Exception as e:
+        output_error(str(e))
+
+
+@app.command("tarot-spreads")
+def tarot_spreads():
+    """List available tarot spreads."""
+    try:
+        from .tarot import SPREADS
+        
+        spreads = []
+        for key, spread in SPREADS.items():
+            spreads.append({
+                "id": key,
+                "name": spread["name"],
+                "count": spread["count"],
+                "positions": spread["positions"],
+                "description": spread["description"],
+            })
+        
+        output_json({
+            "type": "Tarot Spreads",
+            "spreads": spreads,
+        })
+        
+    except Exception as e:
+        output_error(str(e))
+
+
 @app.command()
 def version():
     """Show version."""

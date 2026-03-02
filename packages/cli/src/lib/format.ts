@@ -1132,3 +1132,196 @@ export function formatEphemerisMulti(result: any): string {
   
   return lines.join('\n');
 }
+
+// ═══════════════════════════════════════════════════════════════
+// TAROT FORMATTERS
+// ═══════════════════════════════════════════════════════════════
+
+const TAROT_COLORS = {
+  major: chalk.hex('#FFD700'),     // Gold for Major Arcana
+  wands: chalk.hex('#FF4500'),     // Fire - Orange Red
+  cups: chalk.hex('#4169E1'),      // Water - Royal Blue
+  swords: chalk.hex('#E0E0E0'),    // Air - Silver
+  pentacles: chalk.hex('#228B22'), // Earth - Forest Green
+};
+
+function getTarotColor(card: any): typeof chalk {
+  if (card.arcana === 'major') return TAROT_COLORS.major;
+  return TAROT_COLORS[card.suit as keyof typeof TAROT_COLORS] || chalk.white;
+}
+
+function getSuitSymbol(suit: string): string {
+  const symbols: Record<string, string> = {
+    wands: '🜂',      // Fire alchemical symbol
+    cups: '🜄',       // Water alchemical symbol
+    swords: '🜁',     // Air alchemical symbol
+    pentacles: '🜃',  // Earth alchemical symbol
+  };
+  return symbols[suit] || '';
+}
+
+/**
+ * Format a tarot draw result
+ */
+export function formatTarotDraw(result: any): string {
+  const lines: string[] = [];
+  
+  lines.push('');
+  lines.push(chalk.bold.hex('#9932CC')('🎴 TAROT READING'));
+  lines.push(`   ${chalk.dim('Spread:')} ${result.spread_name}`);
+  if (result.question) {
+    lines.push(`   ${chalk.dim('Question:')} "${result.question}"`);
+  }
+  lines.push(`   ${chalk.dim('Entropy:')} ${result.entropy_source}`);
+  lines.push(`   ${chalk.dim('Time:')} ${result.timestamp}`);
+  lines.push('');
+  
+  lines.push(chalk.bold.cyan('── THE CARDS ──'));
+  lines.push('');
+  
+  for (const card of result.cards) {
+    const color = getTarotColor(card);
+    const reversed = card.reversed ? chalk.red(' ℞ REVERSED') : '';
+    const suitSymbol = card.suit ? ` ${getSuitSymbol(card.suit)}` : '';
+    
+    // Card header
+    lines.push(`   ${chalk.bold.white(`[${card.position}] ${card.position_name}`)}`);
+    lines.push(`   ${color(card.name)}${suitSymbol}${reversed}`);
+    
+    // Card details
+    if (card.arcana === 'major') {
+      const details = [];
+      if (card.hebrew) details.push(card.hebrew);
+      if (card.planet) details.push(`☉ ${card.planet}`);
+      if (card.zodiac) details.push(`♈ ${card.zodiac}`);
+      if (card.element) details.push(`△ ${card.element}`);
+      if (details.length > 0) {
+        lines.push(`   ${chalk.dim(details.join(' | '))}`);
+      }
+    } else {
+      const details = [];
+      if (card.element) details.push(`${card.element}`);
+      if (card.sephira) details.push(card.sephira);
+      if (card.theme) details.push(card.theme);
+      if (details.length > 0) {
+        lines.push(`   ${chalk.dim(details.join(' | '))}`);
+      }
+    }
+    
+    // Keywords
+    const keywords = card.reversed ? card.keywords_reversed : card.keywords_upright;
+    if (keywords && keywords.length > 0) {
+      const keywordStr = keywords.slice(0, 5).join(', ');
+      lines.push(`   ${chalk.italic(keywordStr)}`);
+    }
+    
+    lines.push('');
+  }
+  
+  lines.push(chalk.dim('─'.repeat(60)));
+  lines.push(chalk.dim('   The cards are cast. The interpretation is yours.'));
+  lines.push('');
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format a single tarot card lookup
+ */
+export function formatTarotCard(card: any): string {
+  const lines: string[] = [];
+  const color = getTarotColor(card);
+  
+  lines.push('');
+  lines.push(color(`🎴 ${card.name}`));
+  lines.push(`   ${chalk.dim('Number:')} ${card.number} | ${chalk.dim('Arcana:')} ${card.arcana}`);
+  
+  if (card.arcana === 'major') {
+    if (card.hebrew) lines.push(`   ${chalk.dim('Hebrew:')} ${card.hebrew} | ${chalk.dim('Path:')} ${card.path}`);
+    if (card.planet) lines.push(`   ${chalk.dim('Planet:')} ${card.planet}`);
+    if (card.zodiac) lines.push(`   ${chalk.dim('Zodiac:')} ${card.zodiac}`);
+    if (card.element) lines.push(`   ${chalk.dim('Element:')} ${card.element}`);
+  } else {
+    lines.push(`   ${chalk.dim('Suit:')} ${card.suit} (${card.element})`);
+    lines.push(`   ${chalk.dim('Rank:')} ${card.rank} | ${chalk.dim('Sephira:')} ${card.sephira}`);
+    lines.push(`   ${chalk.dim('Theme:')} ${card.theme}`);
+  }
+  
+  lines.push('');
+  lines.push(chalk.bold.green('   Upright:'));
+  lines.push(`   ${card.keywords_upright.join(', ')}`);
+  lines.push('');
+  lines.push(chalk.bold.red('   Reversed:'));
+  lines.push(`   ${card.keywords_reversed.join(', ')}`);
+  lines.push('');
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format tarot deck listing
+ */
+export function formatTarotDeck(result: any): string {
+  const lines: string[] = [];
+  
+  lines.push('');
+  lines.push(chalk.bold.hex('#9932CC')(`🎴 TAROT DECK (${result.count} cards)`));
+  if (result.filter) {
+    lines.push(`   Filter: ${result.filter}`);
+  }
+  lines.push('');
+  
+  // Group by arcana/suit
+  const majors = result.cards.filter((c: any) => c.arcana === 'major');
+  const wands = result.cards.filter((c: any) => c.suit === 'wands');
+  const cups = result.cards.filter((c: any) => c.suit === 'cups');
+  const swords = result.cards.filter((c: any) => c.suit === 'swords');
+  const pentacles = result.cards.filter((c: any) => c.suit === 'pentacles');
+  
+  if (majors.length > 0) {
+    lines.push(TAROT_COLORS.major('── MAJOR ARCANA ──'));
+    for (const card of majors) {
+      lines.push(`   ${String(card.number).padStart(2)}. ${card.name}`);
+    }
+    lines.push('');
+  }
+  
+  const suits = [
+    { name: 'WANDS', cards: wands, color: TAROT_COLORS.wands, symbol: '🜂' },
+    { name: 'CUPS', cards: cups, color: TAROT_COLORS.cups, symbol: '🜄' },
+    { name: 'SWORDS', cards: swords, color: TAROT_COLORS.swords, symbol: '🜁' },
+    { name: 'PENTACLES', cards: pentacles, color: TAROT_COLORS.pentacles, symbol: '🜃' },
+  ];
+  
+  for (const suit of suits) {
+    if (suit.cards.length > 0) {
+      lines.push(suit.color(`── ${suit.symbol} ${suit.name} ──`));
+      for (const card of suit.cards) {
+        lines.push(`   ${String(card.number).padStart(2)}. ${card.name}`);
+      }
+      lines.push('');
+    }
+  }
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format available spreads
+ */
+export function formatTarotSpreads(result: any): string {
+  const lines: string[] = [];
+  
+  lines.push('');
+  lines.push(chalk.bold.hex('#9932CC')('🎴 AVAILABLE SPREADS'));
+  lines.push('');
+  
+  for (const spread of result.spreads) {
+    lines.push(chalk.bold(`   ${spread.name} (${spread.id})`));
+    lines.push(`   ${chalk.dim(spread.description)}`);
+    lines.push(`   Cards: ${spread.count} — ${spread.positions.join(' → ')}`);
+    lines.push('');
+  }
+  
+  return lines.join('\n');
+}

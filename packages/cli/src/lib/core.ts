@@ -22,6 +22,10 @@ import type {
   MoonExtendedResult,
   TransitScanResult,
   EphemerisMultiResult,
+  TarotDrawResult,
+  TarotCard,
+  TarotDeckResult,
+  TarotSpreadsResult,
   ChartOptions,
   TransitOptions,
   MoonOptions,
@@ -38,6 +42,7 @@ import type {
   MoonExtendedOptions,
   TransitScanOptions,
   EphemerisMultiOptions,
+  TarotDrawOptions,
   ThothResult,
 } from '../types.js';
 
@@ -498,4 +503,45 @@ export async function ephemerisMulti(options: EphemerisMultiOptions): Promise<Th
   if (options.lng !== undefined) args.push('--lng', String(options.lng));
   
   return execute<EphemerisMultiResult>('ephemeris-multi', args);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TAROT
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Draw tarot cards with cryptographic randomness
+ */
+export async function tarotDraw(options: TarotDrawOptions): Promise<ThothResult<TarotDrawResult>> {
+  const args: string[] = [];
+  
+  if (options.count) args.push('--count', String(options.count));
+  if (options.spread) args.push('--spread', options.spread);
+  if (options.question) args.push('--question', options.question);
+  if (options.reversals === false) args.push('--no-reversals');
+  
+  return execute<TarotDrawResult>('tarot-draw', args);
+}
+
+/**
+ * Look up a specific tarot card
+ */
+export async function tarotCard(identifier: string): Promise<ThothResult<TarotCard>> {
+  return execute<TarotCard>('tarot-card', [identifier]);
+}
+
+/**
+ * Get tarot deck (optionally filtered)
+ */
+export async function tarotDeck(filter?: string): Promise<ThothResult<TarotDeckResult>> {
+  const args: string[] = [];
+  if (filter) args.push('--filter', filter);
+  return execute<TarotDeckResult>('tarot-deck', args);
+}
+
+/**
+ * List available tarot spreads
+ */
+export async function tarotSpreads(): Promise<ThothResult<TarotSpreadsResult>> {
+  return execute<TarotSpreadsResult>('tarot-spreads', []);
 }
