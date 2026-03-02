@@ -27,15 +27,60 @@ program
   .name('thoth')
   .description(`𓅝 Astrological calculations from the command line
 
-Examples:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NATAL CHARTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   thoth chart --date 1991-07-08 --time 14:06 --city "New York"
+  thoth chart --date 1991-07-08 --time 14:06 --lat 40.7128 --lng -74.0060
+  thoth chart --date 1991-07-08 --time 14:06 --city "New York" --svg-file chart.svg
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TRANSITS (current planets → natal)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "New York"
-  thoth solar-return --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --year 2026
-  thoth synastry --date1 1991-07-08 --time1 14:06 --city1 "New York" --date2 2026-02-26 --time2 04:35 --city2 "New York"
-  thoth progressions --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --target-date 2026-03-01
-  thoth moon
-  thoth ephemeris --body pluto`)
-  .version('0.2.10');
+  thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" --orb 1
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RETURNS (Solar & Lunar)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  thoth solar-return --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" --year 2026
+  thoth lunar-return --natal-date 1991-07-08 --natal-time 14:06 --city "NYC"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+RELATIONSHIP (Synastry & Composite)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  thoth synastry --date1 1991-07-08 --time1 14:06 --city1 "NYC" \\
+                 --date2 1990-03-15 --time2 09:30 --city2 "LA"
+  thoth composite --date1 1991-07-08 --time1 14:06 --city1 "NYC" \\
+                  --date2 1990-03-15 --time2 09:30 --city2 "LA"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROGRESSIONS & DIRECTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  thoth progressions --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" \\
+                     --target-date 2026-03-01
+  thoth solar-arc --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" \\
+                  --target-date 2026-03-01
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+HORARY (question-based divination)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  thoth horary --question "Should I take the job?" --city "New York"
+  thoth horary --question "Will we reconcile?" --lat 40.7128 --lng -74.0060
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EPHEMERIS & MOON
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  thoth moon                                          # current moon phase
+  thoth ephemeris --body pluto                        # where is pluto now?
+  thoth ephemeris --body saturn --date 2027-01-15    # saturn on specific date
+  thoth ephemeris-range --body pluto --from 2024-01-01 --to 2030-01-01 --step month
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REFERENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  thoth key                                           # full symbol reference`)
+  .version('0.2.11');
 
 // Chart command
 program
