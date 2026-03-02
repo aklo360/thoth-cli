@@ -933,3 +933,202 @@ export function formatHorary(result: HoraryResult): string {
   
   return lines.join('\n');
 }
+
+/**
+ * Format relationship compatibility score
+ */
+export function formatScore(result: any): string {
+  const lines: string[] = [];
+  
+  lines.push('');
+  lines.push(chalk.bold.magenta('💕 Relationship Compatibility Score'));
+  lines.push('');
+  
+  // Score display
+  const scoreValue = result.score.value;
+  const scoreDesc = result.score.description;
+  const scoreColor = scoreValue >= 15 ? chalk.green : scoreValue >= 8 ? chalk.yellow : chalk.red;
+  
+  lines.push(`   ${chalk.bold('Score:')} ${scoreColor(scoreValue)} / 20 (${scoreDesc})`);
+  if (result.score.is_destiny_sign) {
+    lines.push(`   ${chalk.magenta('✨ Destiny Sign Connection!')}`);
+  }
+  lines.push('');
+  
+  // People summary
+  lines.push(chalk.bold.cyan('── COMPARISON ──'));
+  const p1 = result.person1;
+  const p2 = result.person2;
+  lines.push(`   ${chalk.bold(p1.name)}: ${getZodiacSymbol(p1.sun)} ${p1.sun} Sun, ${getZodiacSymbol(p1.moon)} ${p1.moon} Moon`);
+  lines.push(`   ${chalk.bold(p2.name)}: ${getZodiacSymbol(p2.sun)} ${p2.sun} Sun, ${getZodiacSymbol(p2.moon)} ${p2.moon} Moon`);
+  lines.push('');
+  
+  // Score breakdown
+  if (result.breakdown && result.breakdown.length > 0) {
+    lines.push(chalk.bold.cyan('── SCORE BREAKDOWN ──'));
+    for (const b of result.breakdown) {
+      const pointColor = b.points > 0 ? chalk.green : chalk.red;
+      lines.push(`   ${pointColor(`+${b.points}`)} ${b.description}`);
+      lines.push(chalk.dim(`      ${b.details}`));
+    }
+    lines.push('');
+  }
+  
+  // Key aspects
+  if (result.aspects && result.aspects.length > 0) {
+    lines.push(chalk.bold.cyan('── KEY ASPECTS ──'));
+    for (const asp of result.aspects.slice(0, 10)) {
+      const aspSymbol = getAspectSymbol(asp.aspect);
+      lines.push(`   ${asp.planet1} ${aspSymbol} ${asp.aspect} ${asp.planet2}  ${chalk.dim(`(orb: ${asp.orb}°)`)}`);
+    }
+    lines.push('');
+  }
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format extended moon data
+ */
+export function formatMoonExtended(result: any): string {
+  const lines: string[] = [];
+  
+  lines.push('');
+  lines.push(chalk.bold.hex('#C0C0C0')(`🌙 Moon Extended — ${result.datetime}`));
+  lines.push(`   Location: ${result.location.lat}°, ${result.location.lng}° (${result.location.timezone})`);
+  lines.push('');
+  
+  // Moon phase
+  const moon = result.moon;
+  const moonColor = COLORS.moon;
+  lines.push(chalk.bold.cyan('── MOON ──'));
+  lines.push(`   ${moon.emoji} ${chalk.bold(moon.phase_name)} (${moon.stage})`);
+  lines.push(`   ${moonColor(getZodiacSymbol(moon.sign))} Moon in ${moon.sign}`);
+  lines.push(`   Illumination: ${moon.illumination}`);
+  lines.push(`   Age: ${moon.age_days} days`);
+  lines.push('');
+  
+  // Sun data
+  const sun = result.sun;
+  lines.push(chalk.bold.cyan('── SUN ──'));
+  lines.push(`   ☀️ Sunrise: ${sun.sunrise}  |  Sunset: ${sun.sunset}`);
+  lines.push(`   Solar noon: ${sun.solar_noon}  |  Day length: ${sun.day_length}`);
+  lines.push('');
+  
+  // Eclipses
+  lines.push(chalk.bold.cyan('── ECLIPSES ──'));
+  if (moon.next_lunar_eclipse) {
+    lines.push(`   🌑 Next Lunar Eclipse: ${moon.next_lunar_eclipse.date}`);
+    lines.push(`      Type: ${moon.next_lunar_eclipse.type}`);
+  }
+  if (sun.next_solar_eclipse) {
+    lines.push(`   ☀️ Next Solar Eclipse: ${sun.next_solar_eclipse.date}`);
+    lines.push(`      Type: ${sun.next_solar_eclipse.type}`);
+  }
+  lines.push('');
+  
+  // Upcoming phases
+  if (result.upcoming_phases) {
+    lines.push(chalk.bold.cyan('── UPCOMING PHASES ──'));
+    const phases = ['new_moon', 'first_quarter', 'full_moon', 'last_quarter'];
+    const phaseEmojis: Record<string, string> = {
+      'new_moon': '🌑', 'first_quarter': '🌓', 'full_moon': '🌕', 'last_quarter': '🌗'
+    };
+    for (const phase of phases) {
+      const data = result.upcoming_phases[phase];
+      if (data && data.next) {
+        const emoji = phaseEmojis[phase] || '🌙';
+        const name = phase.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+        lines.push(`   ${emoji} ${name}: ${data.next} ${chalk.dim(`(${data.days_until_next} days)`)}`);
+      }
+    }
+    lines.push('');
+  }
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format transit scan results
+ */
+export function formatTransitScan(result: any): string {
+  const lines: string[] = [];
+  
+  lines.push('');
+  lines.push(chalk.bold.blue('🔭 Transit Scan'));
+  lines.push(`   Natal: ${result.natal.date}`);
+  lines.push(`   Range: ${result.scan_range.start} to ${result.scan_range.end}`);
+  lines.push(`   Step: ${result.scan_range.step}  |  Orb: ${result.scan_range.orb}°`);
+  lines.push(`   Found: ${result.total_hits} transit hits`);
+  lines.push('');
+  
+  if (result.hits && result.hits.length > 0) {
+    lines.push(chalk.bold.cyan('── TRANSIT HITS ──'));
+    
+    // Group by date
+    let currentDate = '';
+    for (const hit of result.hits) {
+      if (hit.date !== currentDate) {
+        currentDate = hit.date;
+        lines.push('');
+        lines.push(chalk.bold(`   📅 ${hit.date}`));
+      }
+      
+      const tColor = getPlanetColor(hit.transit_planet.toLowerCase());
+      const nColor = getPlanetColor(hit.natal_planet.toLowerCase());
+      const aspSymbol = getAspectSymbol(hit.aspect);
+      
+      lines.push(`      ${tColor(hit.transit_planet)} ${aspSymbol} ${hit.aspect.slice(0,4)} ${nColor(hit.natal_planet)}  ${chalk.dim(`(${hit.orb.toFixed(2)}°)`)}`);
+    }
+    lines.push('');
+  }
+  
+  return lines.join('\n');
+}
+
+/**
+ * Format multi-body ephemeris
+ */
+export function formatEphemerisMulti(result: any): string {
+  const lines: string[] = [];
+  
+  lines.push('');
+  lines.push(chalk.bold.cyan('📊 Multi-Body Ephemeris'));
+  lines.push(`   Bodies: ${result.bodies.join(', ')}`);
+  lines.push(`   Range: ${result.range.start} to ${result.range.end}`);
+  lines.push(`   Step: ${result.range.step}  |  Points: ${result.total_points}`);
+  lines.push('');
+  
+  lines.push(chalk.bold.cyan('── POSITIONS ──'));
+  
+  // Header
+  const bodyHeaders = result.bodies.map((b: string) => b.slice(0, 6).padEnd(8)).join('');
+  lines.push(`   ${chalk.dim('Date'.padEnd(12))}${bodyHeaders}`);
+  lines.push(chalk.dim('   ' + '─'.repeat(12 + result.bodies.length * 8)));
+  
+  // Data rows
+  for (const pos of result.positions.slice(0, 30)) { // Limit to first 30
+    const date = pos.datetime.slice(0, 10);
+    let row = `   ${date}  `;
+    
+    for (const body of result.bodies) {
+      const data = pos[body];
+      if (data && typeof data === 'object') {
+        const sign = data.sign.slice(0, 3);
+        const deg = Math.floor(data.position);
+        const color = getZodiacColor(sign);
+        row += color(`${sign}${deg}°`.padEnd(8));
+      } else {
+        row += ''.padEnd(8);
+      }
+    }
+    lines.push(row);
+  }
+  
+  if (result.positions.length > 30) {
+    lines.push(chalk.dim(`   ... and ${result.positions.length - 30} more rows (use --json for full data)`));
+  }
+  lines.push('');
+  
+  return lines.join('\n');
+}

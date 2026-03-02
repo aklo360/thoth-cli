@@ -1282,6 +1282,337 @@ def horary(
 
 
 @app.command()
+def score(
+    year1: int = typer.Option(..., help="Person 1 birth year"),
+    month1: int = typer.Option(..., help="Person 1 birth month"),
+    day1: int = typer.Option(..., help="Person 1 birth day"),
+    hour1: int = typer.Option(12, help="Person 1 birth hour"),
+    minute1: int = typer.Option(0, help="Person 1 birth minute"),
+    city1: Optional[str] = typer.Option(None, help="Person 1 city"),
+    nation1: str = typer.Option("US", help="Person 1 country code"),
+    lat1: Optional[float] = typer.Option(None, help="Person 1 latitude"),
+    lng1: Optional[float] = typer.Option(None, help="Person 1 longitude"),
+    year2: int = typer.Option(..., help="Person 2 birth year"),
+    month2: int = typer.Option(..., help="Person 2 birth month"),
+    day2: int = typer.Option(..., help="Person 2 birth day"),
+    hour2: int = typer.Option(12, help="Person 2 birth hour"),
+    minute2: int = typer.Option(0, help="Person 2 birth minute"),
+    city2: Optional[str] = typer.Option(None, help="Person 2 city"),
+    nation2: str = typer.Option("US", help="Person 2 country code"),
+    lat2: Optional[float] = typer.Option(None, help="Person 2 latitude"),
+    lng2: Optional[float] = typer.Option(None, help="Person 2 longitude"),
+    name1: str = typer.Option("Person 1", help="Person 1 name"),
+    name2: str = typer.Option("Person 2", help="Person 2 name"),
+):
+    """Calculate relationship compatibility score."""
+    try:
+        from kerykeion import AstrologicalSubjectFactory, RelationshipScoreFactory
+        
+        p1 = AstrologicalSubjectFactory.from_birth_data(
+            name1, year1, month1, day1, hour1, minute1,
+            city=city1 if city1 else None,
+            nation=nation1,
+            lat=lat1 if lat1 else 51.4769,
+            lng=lng1 if lng1 else 0.0005,
+            tz_str="UTC",
+            online=bool(city1),
+        )
+        
+        p2 = AstrologicalSubjectFactory.from_birth_data(
+            name2, year2, month2, day2, hour2, minute2,
+            city=city2 if city2 else None,
+            nation=nation2,
+            lat=lat2 if lat2 else 51.4769,
+            lng=lng2 if lng2 else 0.0005,
+            tz_str="UTC",
+            online=bool(city2),
+        )
+        
+        factory = RelationshipScoreFactory(p1, p2)
+        result = factory.get_relationship_score()
+        
+        output_json({
+            "type": "Relationship Score",
+            "person1": {
+                "name": name1,
+                "date": f"{year1}-{month1:02d}-{day1:02d}",
+                "sun": p1.sun.sign,
+                "moon": p1.moon.sign,
+                "ascendant": p1.ascendant.sign if hasattr(p1, 'ascendant') else None,
+            },
+            "person2": {
+                "name": name2,
+                "date": f"{year2}-{month2:02d}-{day2:02d}",
+                "sun": p2.sun.sign,
+                "moon": p2.moon.sign,
+                "ascendant": p2.ascendant.sign if hasattr(p2, 'ascendant') else None,
+            },
+            "score": {
+                "value": result.score_value,
+                "description": result.score_description,
+                "is_destiny_sign": result.is_destiny_sign,
+            },
+            "breakdown": [
+                {
+                    "rule": b.rule,
+                    "description": b.description,
+                    "points": b.points,
+                    "details": b.details,
+                }
+                for b in result.score_breakdown
+            ],
+            "aspects": [
+                {
+                    "planet1": a.p1_name,
+                    "planet2": a.p2_name,
+                    "aspect": a.aspect,
+                    "orb": round(a.orbit, 2),
+                }
+                for a in result.aspects
+            ],
+        })
+        
+    except Exception as e:
+        output_error(str(e))
+
+
+@app.command("moon-extended")
+def moon_extended(
+    year: Optional[int] = typer.Option(None, help="Year (default: now)"),
+    month: Optional[int] = typer.Option(None, help="Month"),
+    day: Optional[int] = typer.Option(None, help="Day"),
+    lat: float = typer.Option(40.7128, help="Latitude"),
+    lng: float = typer.Option(-74.0060, help="Longitude"),
+    tz: str = typer.Option("UTC", help="Timezone string (e.g., 'America/New_York')"),
+):
+    """Get detailed moon data with eclipses and astronomical events."""
+    try:
+        from kerykeion import AstrologicalSubjectFactory, MoonPhaseDetailsFactory
+        
+        now = datetime.now()
+        y = year or now.year
+        m = month or now.month
+        d = day or now.day
+        
+        subject = AstrologicalSubjectFactory.from_birth_data(
+            "Moon", y, m, d, now.hour, now.minute,
+            lat=lat, lng=lng, tz_str=tz, online=False
+        )
+        
+        moon_details = MoonPhaseDetailsFactory.from_subject(subject)
+        data = moon_details.model_dump()
+        
+        output_json({
+            "type": "Moon Extended",
+            "datetime": f"{y}-{m:02d}-{d:02d}",
+            "location": {
+                "lat": lat,
+                "lng": lng,
+                "timezone": tz,
+            },
+            "sun": {
+                "sunrise": data['sun']['sunrise_timestamp'],
+                "sunset": data['sun']['sunset_timestamp'],
+                "solar_noon": data['sun']['solar_noon'],
+                "day_length": data['sun']['day_length'],
+                "next_solar_eclipse": {
+                    "date": data['sun']['next_solar_eclipse']['datestamp'] if data['sun']['next_solar_eclipse'] else None,
+                    "type": data['sun']['next_solar_eclipse']['type'] if data['sun']['next_solar_eclipse'] else None,
+                } if data['sun'].get('next_solar_eclipse') else None,
+            },
+            "moon": {
+                "sign": data['moon']['zodiac']['moon_sign'],
+                "phase_name": data['moon']['phase_name'],
+                "major_phase": data['moon']['major_phase'],
+                "stage": data['moon']['stage'],
+                "illumination": data['moon']['illumination'],
+                "age_days": data['moon']['age_days'],
+                "emoji": data['moon']['emoji'],
+                "moonrise": data['moon'].get('moonrise_timestamp'),
+                "moonset": data['moon'].get('moonset_timestamp'),
+                "next_lunar_eclipse": {
+                    "date": data['moon']['next_lunar_eclipse']['datestamp'] if data['moon']['next_lunar_eclipse'] else None,
+                    "type": data['moon']['next_lunar_eclipse']['type'] if data['moon']['next_lunar_eclipse'] else None,
+                } if data['moon'].get('next_lunar_eclipse') else None,
+            },
+            "upcoming_phases": {
+                phase: {
+                    "last": phases['last']['datestamp'] if phases.get('last') else None,
+                    "next": phases['next']['datestamp'] if phases.get('next') else None,
+                    "days_until_next": phases['next']['days_ahead'] if phases.get('next') else None,
+                }
+                for phase, phases in data['moon']['detailed']['upcoming_phases'].items()
+            } if data['moon'].get('detailed', {}).get('upcoming_phases') else None,
+        })
+        
+    except Exception as e:
+        output_error(str(e))
+
+
+@app.command("transit-scan")
+def transit_scan(
+    natal_year: int = typer.Option(..., help="Natal year"),
+    natal_month: int = typer.Option(..., help="Natal month"),
+    natal_day: int = typer.Option(..., help="Natal day"),
+    natal_hour: int = typer.Option(12, help="Natal hour"),
+    natal_minute: int = typer.Option(0, help="Natal minute"),
+    natal_city: Optional[str] = typer.Option(None, help="Natal city"),
+    nation: str = typer.Option("US", help="Country code"),
+    natal_lat: Optional[float] = typer.Option(None, help="Natal latitude"),
+    natal_lng: Optional[float] = typer.Option(None, help="Natal longitude"),
+    start_year: int = typer.Option(..., help="Start year"),
+    start_month: int = typer.Option(1, help="Start month"),
+    start_day: int = typer.Option(1, help="Start day"),
+    end_year: int = typer.Option(..., help="End year"),
+    end_month: int = typer.Option(12, help="End month"),
+    end_day: int = typer.Option(28, help="End day"),
+    orb: float = typer.Option(1.0, help="Orb for aspects (tighter = more precise)"),
+    step: str = typer.Option("day", help="Step: day, week"),
+):
+    """Scan for transit aspects over a date range."""
+    try:
+        natal = create_subject("Natal", natal_year, natal_month, natal_day, natal_hour, natal_minute,
+                               natal_city, nation, natal_lat, natal_lng)
+        
+        from kerykeion import SynastryAspects
+        
+        start = datetime(start_year, start_month, start_day)
+        end = datetime(end_year, end_month, end_day)
+        
+        step_days = 7 if step == "week" else 1
+        current = start
+        
+        transit_hits = []
+        seen_aspects = set()
+        
+        while current <= end:
+            transit_subj = create_subject(
+                "Transit",
+                current.year, current.month, current.day, 12, 0,
+                natal_city, nation, natal_lat, natal_lng
+            )
+            
+            synastry = SynastryAspects(transit_subj, natal)
+            
+            for asp in synastry.all_aspects:
+                if asp['orbit'] <= orb:
+                    # Create unique key for this aspect
+                    key = f"{asp['p1_name']}-{asp['aspect']}-{asp['p2_name']}"
+                    
+                    # Only record if we haven't seen it recently (within 7 days)
+                    if key not in seen_aspects:
+                        transit_hits.append({
+                            "date": str(current.date()),
+                            "transit_planet": asp['p1_name'],
+                            "aspect": asp['aspect'],
+                            "natal_planet": asp['p2_name'],
+                            "orb": round(asp['orbit'], 3),
+                        })
+                        seen_aspects.add(key)
+            
+            # Clear seen aspects after 14 days to allow re-hits
+            if len(seen_aspects) > 100:
+                seen_aspects.clear()
+            
+            current += timedelta(days=step_days)
+        
+        output_json({
+            "type": "Transit Scan",
+            "natal": {
+                "date": f"{natal_year}-{natal_month:02d}-{natal_day:02d}",
+            },
+            "scan_range": {
+                "start": str(start.date()),
+                "end": str(end.date()),
+                "step": step,
+                "orb": orb,
+            },
+            "hits": transit_hits,
+            "total_hits": len(transit_hits),
+        })
+        
+    except Exception as e:
+        output_error(str(e))
+
+
+@app.command("ephemeris-multi")
+def ephemeris_multi(
+    bodies: str = typer.Option("sun,moon,mercury,venus,mars,jupiter,saturn", help="Comma-separated bodies"),
+    start_year: int = typer.Option(..., help="Start year"),
+    start_month: int = typer.Option(1, help="Start month"),
+    start_day: int = typer.Option(1, help="Start day"),
+    end_year: int = typer.Option(..., help="End year"),
+    end_month: int = typer.Option(12, help="End month"),
+    end_day: int = typer.Option(28, help="End day"),
+    step: str = typer.Option("day", help="Step: hour, day, week, month"),
+    lat: float = typer.Option(51.4769, help="Latitude"),
+    lng: float = typer.Option(0.0005, help="Longitude"),
+):
+    """Get ephemeris for multiple bodies over a date range."""
+    try:
+        from kerykeion import EphemerisDataFactory
+        
+        start = datetime(start_year, start_month, start_day)
+        end = datetime(end_year, end_month, end_day)
+        
+        # Map step to factory parameters
+        step_type = "days"
+        step_value = 1
+        if step == "hour":
+            step_type = "hours"
+            step_value = 1
+        elif step == "week":
+            step_type = "days"
+            step_value = 7
+        elif step == "month":
+            step_type = "days"
+            step_value = 30
+        
+        factory = EphemerisDataFactory(
+            start_datetime=start,
+            end_datetime=end,
+            step_type=step_type,
+            step=step_value,
+            lat=lat,
+            lng=lng,
+        )
+        
+        body_list = [b.strip().lower() for b in bodies.split(",")]
+        ephemeris_data = factory.get_ephemeris_data_as_astrological_subjects()
+        
+        positions = []
+        for data_point in ephemeris_data:
+            point = {
+                "datetime": data_point.iso_formatted_utc_datetime,
+            }
+            for body in body_list:
+                planet = getattr(data_point, body, None)
+                if planet:
+                    point[body] = {
+                        "sign": planet.sign,
+                        "position": round(planet.position, 4),
+                        "abs_position": round(planet.abs_pos, 4),
+                        "retrograde": planet.retrograde if hasattr(planet, 'retrograde') else False,
+                    }
+            positions.append(point)
+        
+        output_json({
+            "type": "Multi-Body Ephemeris",
+            "bodies": body_list,
+            "range": {
+                "start": str(start.date()),
+                "end": str(end.date()),
+                "step": step,
+            },
+            "positions": positions,
+            "total_points": len(positions),
+        })
+        
+    except Exception as e:
+        output_error(str(e))
+
+
+@app.command()
 def version():
     """Show version."""
     from . import __version__

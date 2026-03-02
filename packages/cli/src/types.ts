@@ -513,3 +513,188 @@ export type ThothResult<T> = T | ThothError;
 export function isError<T extends object>(result: ThothResult<T>): result is ThothError {
   return 'error' in result;
 }
+
+// Score (Relationship Compatibility)
+export interface ScoreOptions {
+  year1: number;
+  month1: number;
+  day1: number;
+  hour1?: number;
+  minute1?: number;
+  city1?: string;
+  nation1?: string;
+  lat1?: number;
+  lng1?: number;
+  name1?: string;
+  year2: number;
+  month2: number;
+  day2: number;
+  hour2?: number;
+  minute2?: number;
+  city2?: string;
+  nation2?: string;
+  lat2?: number;
+  lng2?: number;
+  name2?: string;
+}
+
+export interface ScoreResult {
+  type: string;
+  person1: {
+    name: string;
+    date: string;
+    sun: string;
+    moon: string;
+    ascendant?: string;
+  };
+  person2: {
+    name: string;
+    date: string;
+    sun: string;
+    moon: string;
+    ascendant?: string;
+  };
+  score: {
+    value: number;
+    description: string;
+    is_destiny_sign: boolean;
+  };
+  breakdown: Array<{
+    rule: string;
+    description: string;
+    points: number;
+    details: string;
+  }>;
+  aspects: Array<{
+    planet1: string;
+    planet2: string;
+    aspect: string;
+    orb: number;
+  }>;
+}
+
+// Moon Extended
+export interface MoonExtendedOptions {
+  year?: number;
+  month?: number;
+  day?: number;
+  lat?: number;
+  lng?: number;
+  tz?: string;
+}
+
+export interface MoonExtendedResult {
+  type: string;
+  datetime: string;
+  location: {
+    lat: number;
+    lng: number;
+    timezone: string;
+  };
+  sun: {
+    sunrise: string;
+    sunset: string;
+    solar_noon: string;
+    day_length: string;
+    next_solar_eclipse?: {
+      date: string;
+      type: string;
+    };
+  };
+  moon: {
+    sign: string;
+    phase_name: string;
+    major_phase: string;
+    stage: string;
+    illumination: string;
+    age_days: number;
+    emoji: string;
+    moonrise?: string;
+    moonset?: string;
+    next_lunar_eclipse?: {
+      date: string;
+      type: string;
+    };
+  };
+  upcoming_phases?: Record<string, {
+    last?: string;
+    next?: string;
+    days_until_next?: number;
+  }>;
+}
+
+// Transit Scan
+export interface TransitScanOptions {
+  natalYear: number;
+  natalMonth: number;
+  natalDay: number;
+  natalHour?: number;
+  natalMinute?: number;
+  natalCity?: string;
+  nation?: string;
+  natalLat?: number;
+  natalLng?: number;
+  startYear: number;
+  startMonth?: number;
+  startDay?: number;
+  endYear: number;
+  endMonth?: number;
+  endDay?: number;
+  orb?: number;
+  step?: 'day' | 'week';
+}
+
+export interface TransitScanResult {
+  type: string;
+  natal: {
+    date: string;
+  };
+  scan_range: {
+    start: string;
+    end: string;
+    step: string;
+    orb: number;
+  };
+  hits: Array<{
+    date: string;
+    transit_planet: string;
+    aspect: string;
+    natal_planet: string;
+    orb: number;
+  }>;
+  total_hits: number;
+}
+
+// Ephemeris Multi
+export interface EphemerisMultiOptions {
+  bodies?: string;
+  startYear: number;
+  startMonth?: number;
+  startDay?: number;
+  endYear: number;
+  endMonth?: number;
+  endDay?: number;
+  step?: 'hour' | 'day' | 'week' | 'month';
+  lat?: number;
+  lng?: number;
+}
+
+export interface EphemerisMultiResult {
+  type: string;
+  bodies: string[];
+  range: {
+    start: string;
+    end: string;
+    step: string;
+  };
+  positions: Array<{
+    datetime: string;
+    [body: string]: {
+      sign: string;
+      position: number;
+      abs_position: number;
+      retrograde: boolean;
+    } | string;
+  }>;
+  total_points: number;
+}

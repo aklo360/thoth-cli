@@ -18,6 +18,10 @@ import type {
   CompositeResult,
   SolarArcResult,
   HoraryResult,
+  ScoreResult,
+  MoonExtendedResult,
+  TransitScanResult,
+  EphemerisMultiResult,
   ChartOptions,
   TransitOptions,
   MoonOptions,
@@ -30,6 +34,10 @@ import type {
   CompositeOptions,
   SolarArcOptions,
   HoraryOptions,
+  ScoreOptions,
+  MoonExtendedOptions,
+  TransitScanOptions,
+  EphemerisMultiOptions,
   ThothResult,
 } from '../types.js';
 
@@ -384,4 +392,110 @@ export async function horary(options: HoraryOptions): Promise<ThothResult<Horary
  */
 export async function version(): Promise<ThothResult<{ version: string }>> {
   return execute<{ version: string }>('version', []);
+}
+
+/**
+ * Calculate relationship compatibility score
+ */
+export async function score(options: ScoreOptions): Promise<ThothResult<ScoreResult>> {
+  const args = [
+    '--year1', String(options.year1),
+    '--month1', String(options.month1),
+    '--day1', String(options.day1),
+    '--hour1', String(options.hour1 ?? 12),
+    '--minute1', String(options.minute1 ?? 0),
+    '--name1', options.name1 ?? 'Person 1',
+    '--year2', String(options.year2),
+    '--month2', String(options.month2),
+    '--day2', String(options.day2),
+    '--hour2', String(options.hour2 ?? 12),
+    '--minute2', String(options.minute2 ?? 0),
+    '--name2', options.name2 ?? 'Person 2',
+  ];
+  
+  if (options.city1) {
+    args.push('--city1', options.city1);
+    args.push('--nation1', options.nation1 ?? 'US');
+  } else if (options.lat1 !== undefined && options.lng1 !== undefined) {
+    args.push('--lat1', String(options.lat1));
+    args.push('--lng1', String(options.lng1));
+  }
+  
+  if (options.city2) {
+    args.push('--city2', options.city2);
+    args.push('--nation2', options.nation2 ?? 'US');
+  } else if (options.lat2 !== undefined && options.lng2 !== undefined) {
+    args.push('--lat2', String(options.lat2));
+    args.push('--lng2', String(options.lng2));
+  }
+  
+  return execute<ScoreResult>('score', args);
+}
+
+/**
+ * Get extended moon data with eclipses
+ */
+export async function moonExtended(options: MoonExtendedOptions): Promise<ThothResult<MoonExtendedResult>> {
+  const args: string[] = [];
+  
+  if (options.year) args.push('--year', String(options.year));
+  if (options.month) args.push('--month', String(options.month));
+  if (options.day) args.push('--day', String(options.day));
+  if (options.lat !== undefined) args.push('--lat', String(options.lat));
+  if (options.lng !== undefined) args.push('--lng', String(options.lng));
+  if (options.tz) args.push('--tz', options.tz);
+  
+  return execute<MoonExtendedResult>('moon-extended', args);
+}
+
+/**
+ * Scan for transits over a date range
+ */
+export async function transitScan(options: TransitScanOptions): Promise<ThothResult<TransitScanResult>> {
+  const args = [
+    '--natal-year', String(options.natalYear),
+    '--natal-month', String(options.natalMonth),
+    '--natal-day', String(options.natalDay),
+    '--natal-hour', String(options.natalHour ?? 12),
+    '--natal-minute', String(options.natalMinute ?? 0),
+    '--start-year', String(options.startYear),
+    '--start-month', String(options.startMonth ?? 1),
+    '--start-day', String(options.startDay ?? 1),
+    '--end-year', String(options.endYear),
+    '--end-month', String(options.endMonth ?? 12),
+    '--end-day', String(options.endDay ?? 28),
+    '--orb', String(options.orb ?? 1),
+    '--step', options.step ?? 'day',
+  ];
+  
+  if (options.natalCity) {
+    args.push('--natal-city', options.natalCity);
+    args.push('--nation', options.nation ?? 'US');
+  } else if (options.natalLat !== undefined && options.natalLng !== undefined) {
+    args.push('--natal-lat', String(options.natalLat));
+    args.push('--natal-lng', String(options.natalLng));
+  }
+  
+  return execute<TransitScanResult>('transit-scan', args);
+}
+
+/**
+ * Get multi-body ephemeris over a date range
+ */
+export async function ephemerisMulti(options: EphemerisMultiOptions): Promise<ThothResult<EphemerisMultiResult>> {
+  const args = [
+    '--bodies', options.bodies ?? 'sun,moon,mercury,venus,mars,jupiter,saturn',
+    '--start-year', String(options.startYear),
+    '--start-month', String(options.startMonth ?? 1),
+    '--start-day', String(options.startDay ?? 1),
+    '--end-year', String(options.endYear),
+    '--end-month', String(options.endMonth ?? 12),
+    '--end-day', String(options.endDay ?? 28),
+    '--step', options.step ?? 'day',
+  ];
+  
+  if (options.lat !== undefined) args.push('--lat', String(options.lat));
+  if (options.lng !== undefined) args.push('--lng', String(options.lng));
+  
+  return execute<EphemerisMultiResult>('ephemeris-multi', args);
 }

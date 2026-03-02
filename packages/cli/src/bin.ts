@@ -11,13 +11,14 @@ import { writeFileSync } from 'fs';
 import { 
   chart, transit, moon, ephemeris, version,
   solarReturn, lunarReturn, synastry, progressions, ephemerisRange,
-  composite, solarArc, horary
+  composite, solarArc, horary, score, moonExtended, transitScan, ephemerisMulti
 } from './lib/core.js';
 import { 
   formatChart, formatTransits, formatMoon, formatEphemeris,
   formatSolarReturn, formatLunarReturn, formatSynastry, 
   formatProgressions, formatEphemerisRange,
-  formatComposite, formatSolarArc, formatHorary
+  formatComposite, formatSolarArc, formatHorary,
+  formatScore, formatMoonExtended, formatTransitScan, formatEphemerisMulti
 } from './lib/format.js';
 import { isError } from './types.js';
 
@@ -80,7 +81,7 @@ EPHEMERIS & MOON
 REFERENCE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   thoth key                                           # full symbol reference`)
-  .version('0.2.16');
+  .version('0.2.17');
 
 // Chart command
 program
@@ -884,9 +885,180 @@ program
     console.log('');
   });
 
+// Score command - relationship compatibility
+program
+  .command('score')
+  .description('Calculate relationship compatibility score')
+  .requiredOption('--date1 <date>', 'Person 1 birth date (YYYY-MM-DD)')
+  .requiredOption('--time1 <time>', 'Person 1 birth time (HH:MM)')
+  .option('--city1 <city>', 'Person 1 city')
+  .option('--nation1 <nation>', 'Person 1 country code', 'US')
+  .option('--lat1 <lat>', 'Person 1 latitude', parseFloat)
+  .option('--lng1 <lng>', 'Person 1 longitude', parseFloat)
+  .option('--name1 <name>', 'Person 1 name', 'Person 1')
+  .requiredOption('--date2 <date>', 'Person 2 birth date (YYYY-MM-DD)')
+  .requiredOption('--time2 <time>', 'Person 2 birth time (HH:MM)')
+  .option('--city2 <city>', 'Person 2 city')
+  .option('--nation2 <nation>', 'Person 2 country code', 'US')
+  .option('--lat2 <lat>', 'Person 2 latitude', parseFloat)
+  .option('--lng2 <lng>', 'Person 2 longitude', parseFloat)
+  .option('--name2 <name>', 'Person 2 name', 'Person 2')
+  .option('--json', 'Output raw JSON')
+  .action(async (options) => {
+    const [year1, month1, day1] = options.date1.split('-').map(Number);
+    const [hour1, minute1] = options.time1.split(':').map(Number);
+    const [year2, month2, day2] = options.date2.split('-').map(Number);
+    const [hour2, minute2] = options.time2.split(':').map(Number);
+    
+    const spinner = ora('Calculating compatibility...').start();
+    
+    const result = await score({
+      year1, month1, day1, hour1, minute1,
+      city1: options.city1, nation1: options.nation1,
+      lat1: options.lat1, lng1: options.lng1, name1: options.name1,
+      year2, month2, day2, hour2, minute2,
+      city2: options.city2, nation2: options.nation2,
+      lat2: options.lat2, lng2: options.lng2, name2: options.name2,
+    });
+    
+    spinner.stop();
+    
+    if (isError(result)) {
+      console.error(chalk.red('Error: ' + result.error));
+      process.exit(1);
+    }
+    
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(formatScore(result));
+    }
+  });
+
+// Moon extended command
+program
+  .command('moon-extended')
+  .description('Get detailed moon data with eclipses and sunrise/sunset')
+  .option('--date <date>', 'Date (YYYY-MM-DD, default: today)')
+  .option('--lat <lat>', 'Latitude', parseFloat, 40.7128)
+  .option('--lng <lng>', 'Longitude', parseFloat, -74.0060)
+  .option('--tz <tz>', 'Timezone', 'America/New_York')
+  .option('--json', 'Output raw JSON')
+  .action(async (options) => {
+    let year, month, day;
+    if (options.date) {
+      [year, month, day] = options.date.split('-').map(Number);
+    }
+    
+    const spinner = ora('Getting moon details...').start();
+    
+    const result = await moonExtended({
+      year, month, day,
+      lat: options.lat, lng: options.lng, tz: options.tz,
+    });
+    
+    spinner.stop();
+    
+    if (isError(result)) {
+      console.error(chalk.red('Error: ' + result.error));
+      process.exit(1);
+    }
+    
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(formatMoonExtended(result));
+    }
+  });
+
+// Transit scan command
+program
+  .command('transit-scan')
+  .description('Scan for transit aspects over a date range')
+  .requiredOption('--natal-date <date>', 'Natal birth date (YYYY-MM-DD)')
+  .requiredOption('--natal-time <time>', 'Natal birth time (HH:MM)')
+  .option('--city <city>', 'Natal city')
+  .option('--nation <nation>', 'Country code', 'US')
+  .option('--lat <lat>', 'Natal latitude', parseFloat)
+  .option('--lng <lng>', 'Natal longitude', parseFloat)
+  .requiredOption('--from <date>', 'Start date (YYYY-MM-DD)')
+  .requiredOption('--to <date>', 'End date (YYYY-MM-DD)')
+  .option('--orb <orb>', 'Aspect orb in degrees', parseFloat, 1)
+  .option('--step <step>', 'Step: day or week', 'day')
+  .option('--json', 'Output raw JSON')
+  .action(async (options) => {
+    const [natalYear, natalMonth, natalDay] = options.natalDate.split('-').map(Number);
+    const [natalHour, natalMinute] = options.natalTime.split(':').map(Number);
+    const [startYear, startMonth, startDay] = options.from.split('-').map(Number);
+    const [endYear, endMonth, endDay] = options.to.split('-').map(Number);
+    
+    const spinner = ora('Scanning transits...').start();
+    
+    const result = await transitScan({
+      natalYear, natalMonth, natalDay, natalHour, natalMinute,
+      natalCity: options.city, nation: options.nation,
+      natalLat: options.lat, natalLng: options.lng,
+      startYear, startMonth, startDay,
+      endYear, endMonth, endDay,
+      orb: options.orb, step: options.step,
+    });
+    
+    spinner.stop();
+    
+    if (isError(result)) {
+      console.error(chalk.red('Error: ' + result.error));
+      process.exit(1);
+    }
+    
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(formatTransitScan(result));
+    }
+  });
+
+// Ephemeris multi command
+program
+  .command('ephemeris-multi')
+  .description('Get ephemeris for multiple bodies over a date range')
+  .option('--bodies <bodies>', 'Comma-separated bodies', 'sun,moon,mercury,venus,mars,jupiter,saturn')
+  .requiredOption('--from <date>', 'Start date (YYYY-MM-DD)')
+  .requiredOption('--to <date>', 'End date (YYYY-MM-DD)')
+  .option('--step <step>', 'Step: hour, day, week, month', 'day')
+  .option('--lat <lat>', 'Latitude', parseFloat)
+  .option('--lng <lng>', 'Longitude', parseFloat)
+  .option('--json', 'Output raw JSON')
+  .action(async (options) => {
+    const [startYear, startMonth, startDay] = options.from.split('-').map(Number);
+    const [endYear, endMonth, endDay] = options.to.split('-').map(Number);
+    
+    const spinner = ora('Getting ephemeris data...').start();
+    
+    const result = await ephemerisMulti({
+      bodies: options.bodies,
+      startYear, startMonth, startDay,
+      endYear, endMonth, endDay,
+      step: options.step,
+      lat: options.lat, lng: options.lng,
+    });
+    
+    spinner.stop();
+    
+    if (isError(result)) {
+      console.error(chalk.red('Error: ' + result.error));
+      process.exit(1);
+    }
+    
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(formatEphemerisMulti(result));
+    }
+  });
+
 // Banner
 console.log(chalk.dim(''));
-console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.16'));
+console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.17'));
 console.log(chalk.dim(''));
 
 program.parse();
