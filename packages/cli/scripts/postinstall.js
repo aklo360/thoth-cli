@@ -12,8 +12,8 @@ import https from 'https';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const VERSION = '0.1.0';
-const REPO = 'aklo/thoth-cli';
+const VERSION = '0.2.3';
+const REPO = 'aklo360/thoth-cli';
 const BASE_URL = `https://github.com/${REPO}/releases/download/v${VERSION}`;
 
 function getPlatformKey() {
