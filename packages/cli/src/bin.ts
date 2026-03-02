@@ -81,7 +81,7 @@ EPHEMERIS & MOON
 REFERENCE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   thoth key                                           # full symbol reference`)
-  .version('0.2.17');
+  .version('0.2.18');
 
 // Chart command
 program
@@ -628,14 +628,41 @@ program
   .option('--date <date>', 'Date (YYYY-MM-DD, default: today)')
   .option('--lat <lat>', 'Latitude', parseFloat, 40.7128)
   .option('--lng <lng>', 'Longitude', parseFloat, -74.0060)
+  .option('--tz <tz>', 'Timezone (for extended)', 'America/New_York')
+  .option('--extended', 'Show extended data (eclipses, sunrise/sunset)')
   .option('--json', 'Output raw JSON')
   .action(async (options) => {
-    const spinner = ora('Getting moon phase...').start();
-    
     let year, month, day;
     if (options.date) {
       [year, month, day] = options.date.split('-').map(Number);
     }
+    
+    // Use extended moon if --extended flag
+    if (options.extended) {
+      const spinner = ora('Getting moon details...').start();
+      
+      const result = await moonExtended({
+        year, month, day,
+        lat: options.lat, lng: options.lng, tz: options.tz,
+      });
+      
+      spinner.stop();
+      
+      if (isError(result)) {
+        console.error(chalk.red(`Error: ${result.error}`));
+        process.exit(1);
+      }
+      
+      if (options.json) {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        console.log(formatMoonExtended(result));
+      }
+      return;
+    }
+    
+    // Standard moon
+    const spinner = ora('Getting moon phase...').start();
     
     const result = await moon({
       year, month, day,
@@ -935,42 +962,6 @@ program
     }
   });
 
-// Moon extended command
-program
-  .command('moon-extended')
-  .description('Get detailed moon data with eclipses and sunrise/sunset')
-  .option('--date <date>', 'Date (YYYY-MM-DD, default: today)')
-  .option('--lat <lat>', 'Latitude', parseFloat, 40.7128)
-  .option('--lng <lng>', 'Longitude', parseFloat, -74.0060)
-  .option('--tz <tz>', 'Timezone', 'America/New_York')
-  .option('--json', 'Output raw JSON')
-  .action(async (options) => {
-    let year, month, day;
-    if (options.date) {
-      [year, month, day] = options.date.split('-').map(Number);
-    }
-    
-    const spinner = ora('Getting moon details...').start();
-    
-    const result = await moonExtended({
-      year, month, day,
-      lat: options.lat, lng: options.lng, tz: options.tz,
-    });
-    
-    spinner.stop();
-    
-    if (isError(result)) {
-      console.error(chalk.red('Error: ' + result.error));
-      process.exit(1);
-    }
-    
-    if (options.json) {
-      console.log(JSON.stringify(result, null, 2));
-    } else {
-      console.log(formatMoonExtended(result));
-    }
-  });
-
 // Transit scan command
 program
   .command('transit-scan')
@@ -1058,7 +1049,7 @@ program
 
 // Banner
 console.log(chalk.dim(''));
-console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.17'));
+console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.18'));
 console.log(chalk.dim(''));
 
 program.parse();
