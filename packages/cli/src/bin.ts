@@ -35,7 +35,7 @@ Examples:
   thoth progressions --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --target-date 2026-03-01
   thoth moon
   thoth ephemeris --body pluto`)
-  .version('0.2.6');
+  .version('0.2.7');
 
 // Chart command
 program
@@ -725,7 +725,7 @@ program
 
 // Banner
 console.log(chalk.dim(''));
-console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.6'));
+console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.7'));
 console.log(chalk.dim(''));
 
 program.parse();

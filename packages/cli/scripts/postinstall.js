@@ -6,13 +6,13 @@
 
 import { platform, arch } from 'os';
 import { join, dirname } from 'path';
-import { existsSync, mkdirSync, createWriteStream, chmodSync } from 'fs';
+import { existsSync, mkdirSync, createWriteStream, chmodSync, statSync } from 'fs';
 import { fileURLToPath } from 'url';
 import https from 'https';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const VERSION = '0.2.6';
+const VERSION = '0.2.7';
 const REPO = 'aklo360/thoth-cli';
 const BASE_URL = `https://github.com/${REPO}/releases/download/v${VERSION}`;
 
@@ -69,10 +69,14 @@ async function main() {
   const binDir = join(__dirname, '..', 'bin', platformKey);
   const binaryPath = join(binDir, binaryName);
   
-  // Skip if binary already exists
+  // Skip if binary already exists AND has content
   if (existsSync(binaryPath)) {
-    console.log(`✓ thoth-core binary already exists`);
-    return;
+    const stats = statSync(binaryPath);
+    if (stats.size > 0) {
+      console.log(`✓ thoth-core binary already exists`);
+      return;
+    }
+    console.log(`Found empty placeholder, downloading actual binary...`);
   }
   
   console.log(`Downloading thoth-core for ${platformKey}...`);
