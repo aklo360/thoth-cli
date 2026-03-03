@@ -33,55 +33,55 @@ npm install -g thoth-cli
 
 ### Natal Chart
 ```bash
-thoth chart --date 1991-07-08 --time 14:06 --city "New York" --nation US
+thoth chart --date 1879-03-14 --time 11:30 --city "New York" --nation US
 ```
 
 ### Transits (Current)
 ```bash
-thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --nation US --orb 1
+thoth transit --natal-date 1879-03-14 --natal-time 11:30 --city "New York" --nation US --orb 1
 ```
 
 ### Transits (Future Date)
 ```bash
-thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --nation US --transit-date 2027-01-15
+thoth transit --natal-date 1879-03-14 --natal-time 11:30 --city "New York" --nation US --transit-date 2027-01-15
 ```
 
 ### Solar Return
 ```bash
-thoth solar-return --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --nation US --year 2026
+thoth solar-return --natal-date 1879-03-14 --natal-time 11:30 --city "New York" --nation US --year 2026
 ```
 
 ### Lunar Return
 ```bash
-thoth lunar-return --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --nation US --year 2026 --month 3
+thoth lunar-return --natal-date 1879-03-14 --natal-time 11:30 --city "New York" --nation US --year 2026 --month 3
 ```
 
 ### Synastry
 ```bash
-thoth synastry --date1 1991-07-08 --time1 14:06 --city1 "New York" --nation1 US \
+thoth synastry --date1 1879-03-14 --time1 11:30 --city1 "New York" --nation1 US \
                --date2 1990-01-15 --time2 09:30 --city2 "Los Angeles" --nation2 US
 ```
 
 ### Composite
 ```bash
-thoth composite --date1 1991-07-08 --time1 14:06 --city1 "New York" --nation1 US \
+thoth composite --date1 1879-03-14 --time1 11:30 --city1 "New York" --nation1 US \
                 --date2 1990-01-15 --time2 09:30 --city2 "Los Angeles" --nation2 US
 ```
 
 ### Compatibility Score
 ```bash
-thoth score --date1 1991-07-08 --time1 14:06 --city1 "New York" --nation1 US \
+thoth score --date1 1879-03-14 --time1 11:30 --city1 "New York" --nation1 US \
             --date2 1990-01-15 --time2 09:30 --city2 "Los Angeles" --nation2 US
 ```
 
 ### Progressions
 ```bash
-thoth progressions --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --nation US --prog-year 2026
+thoth progressions --natal-date 1879-03-14 --natal-time 11:30 --city "New York" --nation US --prog-year 2026
 ```
 
 ### Solar Arc
 ```bash
-thoth solar-arc --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --nation US --arc-year 2026
+thoth solar-arc --natal-date 1879-03-14 --natal-time 11:30 --city "New York" --nation US --arc-year 2026
 ```
 
 ### Horary
@@ -106,7 +106,7 @@ thoth ephemeris-multi --bodies sun,moon,mars --start-year 2026 --end-year 2026 -
 
 ### Transit Scan
 ```bash
-thoth transit-scan --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --nation US \
+thoth transit-scan --natal-date 1879-03-14 --natal-time 11:30 --city "New York" --nation US \
                    --start-year 2026 --end-year 2027 --orb 1
 ```
 
@@ -185,12 +185,12 @@ Pythagorean system. Master numbers (11, 22, 33) preserved.
 
 ### Full Profile
 ```bash
-thoth numerology --date 1991-07-08 --name "Full Name"
+thoth numerology --date 1879-03-14 --name "Full Name"
 ```
 
 ### Life Path Only
 ```bash
-thoth numerology --date 1991-07-08
+thoth numerology --date 1879-03-14
 ```
 
 ### Name Numbers Only
@@ -200,8 +200,8 @@ thoth numerology --name "Full Name"
 
 ### Personal Cycles
 ```bash
-thoth numerology-year --date 1991-07-08
-thoth numerology-year --date 1991-07-08 --target-date 2026-06-15
+thoth numerology-year --date 1879-03-14
+thoth numerology-year --date 1879-03-14 --target-date 2026-06-15
 ```
 
 ### Core Numbers

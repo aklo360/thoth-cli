@@ -34,19 +34,19 @@ The binary downloads automatically on first install (~18MB).
 
 ```bash
 # Natal chart
-thoth chart --date 1991-07-08 --time 14:06 --city "New York"
+thoth chart --date 1879-03-14 --time 11:30 --city "New York"
 
 # Current transits
-thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "New York"
+thoth transit --natal-date 1879-03-14 --natal-time 11:30 --city "New York"
 
 # Solar return for 2026
-thoth solar-return --natal-date 1991-07-08 --natal-time 14:06 --city "New York" --year 2026
+thoth solar-return --natal-date 1879-03-14 --natal-time 11:30 --city "New York" --year 2026
 
 # Horary divination
 thoth horary --question "Should I take the job?" --city "New York"
 
 # Relationship synastry
-thoth synastry --date1 1991-07-08 --time1 14:06 --city1 "NYC" \
+thoth synastry --date1 1879-03-14 --time1 11:30 --city1 "NYC" \
                --date2 1990-03-15 --time2 09:30 --city2 "LA"
 
 # Moon phase
@@ -68,9 +68,9 @@ thoth key
 Calculate a complete birth chart.
 
 ```bash
-thoth chart --date 1991-07-08 --time 14:06 --city "New York"
-thoth chart --date 1991-07-08 --time 14:06 --lat 40.7128 --lng -74.0060
-thoth chart --date 1991-07-08 --time 14:06 --city "New York" --svg-file chart.svg
+thoth chart --date 1879-03-14 --time 11:30 --city "New York"
+thoth chart --date 1879-03-14 --time 11:30 --lat 40.7128 --lng -74.0060
+thoth chart --date 1879-03-14 --time 11:30 --city "New York" --svg-file chart.svg
 ```
 
 | Flag | Description | Required |
@@ -94,8 +94,8 @@ thoth chart --date 1991-07-08 --time 14:06 --city "New York" --svg-file chart.sv
 Calculate transits to a natal chart.
 
 ```bash
-thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "New York"
-thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" --orb 1
+thoth transit --natal-date 1879-03-14 --natal-time 11:30 --city "New York"
+thoth transit --natal-date 1879-03-14 --natal-time 11:30 --city "NYC" --orb 1
 ```
 
 | Flag | Description | Required |
@@ -115,7 +115,7 @@ thoth transit --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" --orb 1
 Calculate solar return chart for a specific year.
 
 ```bash
-thoth solar-return --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" --year 2026
+thoth solar-return --natal-date 1879-03-14 --natal-time 11:30 --city "NYC" --year 2026
 ```
 
 | Flag | Description | Required |
@@ -133,7 +133,7 @@ thoth solar-return --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" --yea
 Calculate next lunar return from a given date.
 
 ```bash
-thoth lunar-return --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" --from 2026-03-01
+thoth lunar-return --natal-date 1879-03-14 --natal-time 11:30 --city "NYC" --from 2026-03-01
 ```
 
 | Flag | Description | Required |
@@ -151,7 +151,7 @@ thoth lunar-return --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" --fro
 Calculate synastry aspects between two charts.
 
 ```bash
-thoth synastry --date1 1991-07-08 --time1 14:06 --city1 "NYC" \
+thoth synastry --date1 1879-03-14 --time1 11:30 --city1 "NYC" \
                --date2 1990-03-15 --time2 09:30 --city2 "LA"
 ```
 
@@ -171,7 +171,7 @@ thoth synastry --date1 1991-07-08 --time1 14:06 --city1 "NYC" \
 Calculate composite (midpoint) chart for a relationship.
 
 ```bash
-thoth composite --date1 1991-07-08 --time1 14:06 --city1 "NYC" \
+thoth composite --date1 1879-03-14 --time1 11:30 --city1 "NYC" \
                 --date2 1990-03-15 --time2 09:30 --city2 "LA"
 ```
 
@@ -184,7 +184,7 @@ Same options as synastry. Creates a merged chart representing the relationship i
 Calculate secondary progressions (day-for-a-year method).
 
 ```bash
-thoth progressions --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" \
+thoth progressions --natal-date 1879-03-14 --natal-time 11:30 --city "NYC" \
                    --target-date 2026-03-01
 ```
 
@@ -203,7 +203,7 @@ thoth progressions --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" \
 Calculate solar arc directions (all planets advance by Sun's arc).
 
 ```bash
-thoth solar-arc --natal-date 1991-07-08 --natal-time 14:06 --city "NYC" \
+thoth solar-arc --natal-date 1879-03-14 --natal-time 11:30 --city "NYC" \
                 --target-date 2026-03-01
 ```
 
@@ -320,7 +320,7 @@ thoth-cli uses **Sephirotic colors** based on Kabbalistic correspondences:
 All commands support `--json` for programmatic use:
 
 ```bash
-thoth chart --date 1991-07-08 --time 14:06 --city "NYC" --json
+thoth chart --date 1879-03-14 --time 11:30 --city "NYC" --json
 thoth horary --question "Test" --city "NYC" --json
 ```
 
@@ -367,7 +367,7 @@ npm install
 npm run build
 
 # Test
-node dist/bin.js chart --date 1991-07-08 --time 14:06 --city "New York"
+node dist/bin.js chart --date 1879-03-14 --time 11:30 --city "New York"
 ```
 
 ---
