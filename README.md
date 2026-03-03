@@ -380,6 +380,29 @@ node dist/bin.js chart --date 1991-07-08 --time 14:06 --city "New York"
 
 ---
 
+## For AI Agents
+
+Instant onboarding for Claude Code, OpenClaw, and other AI agents.
+
+**Point your agent to:**
+
+```
+https://thothcli.com/skillmd
+```
+
+Or use the skill file directly from the repo:
+
+```
+.claude/skills/thoth-cli/SKILL.md
+```
+
+The skill file includes:
+- All commands and examples
+- The golden rule: **CLI provides DATA, agent provides INTERPRETATION**
+- Never fabricate positions or card draws — run the CLI first
+
+---
+
 ## License
 
 **MIT** — Use it for anything. Free forever.
