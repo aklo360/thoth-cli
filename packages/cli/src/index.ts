@@ -7,3 +7,5 @@
 export * from './lib/core.js';
 export * from './types.js';
 export * from './lib/format.js';
+export * from './lib/gematria.js';
+export * from './lib/numerology.js';

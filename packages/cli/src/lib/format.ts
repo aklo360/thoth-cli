@@ -4,6 +4,9 @@
  */
 
 import chalk from 'chalk';
+import type { GematriaResult, GematriaCompareResult, GematriaLookupResult } from './gematria.js';
+import type { NumerologyResult, PersonalCycle } from './numerology.js';
+import { getNumberMeaning } from './numerology.js';
 
 // Kabbalistic/Sephirotic color system
 const COLORS = {
@@ -1322,6 +1325,253 @@ export function formatTarotSpreads(result: any): string {
     lines.push(`   Cards: ${spread.count} — ${spread.positions.join(' → ')}`);
     lines.push('');
   }
-  
+
+  return lines.join('\n');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GEMATRIA FORMATTERS
+// ═══════════════════════════════════════════════════════════════
+
+const GEMATRIA_COLORS = {
+  hebrew: chalk.hex('#4169E1'),    // Blue - Chesed
+  greek: chalk.hex('#00FF7F'),     // Green
+  english: chalk.hex('#FFD700'),   // Gold
+  value: chalk.bold.white,
+  dim: chalk.dim,
+  header: chalk.bold.hex('#9932CC'),
+};
+
+export function formatGematria(result: GematriaResult): string {
+  const lines: string[] = [];
+
+  lines.push('');
+  lines.push(GEMATRIA_COLORS.header('    GEMATRIA'));
+  lines.push(`   ${chalk.dim('Text:')} ${chalk.white(result.text)}`);
+  if (result.transliteration) {
+    lines.push(`   ${chalk.dim('Hebrew:')} ${GEMATRIA_COLORS.hebrew(result.transliteration)} ${chalk.dim('(transliterated)')}`);
+  }
+  lines.push('');
+
+  lines.push(chalk.bold.cyan('── VALUES ──'));
+
+  // Group by language
+  const hebrew = result.systems.filter(s => s.key.startsWith('hebrew'));
+  const greek = result.systems.filter(s => s.key.startsWith('greek'));
+  const english = result.systems.filter(s => s.key.startsWith('english'));
+
+  if (hebrew.length > 0) {
+    lines.push(`   ${GEMATRIA_COLORS.hebrew('Hebrew')}`);
+    for (const sys of hebrew) {
+      const label = sys.name.replace('Hebrew ', '');
+      lines.push(`     ${chalk.dim(label.padEnd(12))} ${GEMATRIA_COLORS.value(String(sys.value))}`);
+    }
+  }
+
+  if (greek.length > 0) {
+    lines.push(`   ${GEMATRIA_COLORS.greek('Greek')}`);
+    for (const sys of greek) {
+      const label = sys.name.replace('Greek ', '');
+      lines.push(`     ${chalk.dim(label.padEnd(12))} ${GEMATRIA_COLORS.value(String(sys.value))}`);
+    }
+  }
+
+  if (english.length > 0) {
+    lines.push(`   ${GEMATRIA_COLORS.english('English')}`);
+    for (const sys of english) {
+      const label = sys.name.replace('English ', '');
+      lines.push(`     ${chalk.dim(label.padEnd(12))} ${GEMATRIA_COLORS.value(String(sys.value))}`);
+    }
+  }
+
+  // Notable matches
+  if (result.notable.length > 0) {
+    lines.push('');
+    lines.push(chalk.bold.cyan('── NOTABLE MATCHES ──'));
+    for (const n of result.notable) {
+      lines.push(`   ${chalk.bold.white(String(n.value))}`);
+      for (const m of n.matches) {
+        lines.push(`     ${chalk.dim(m.word)} ${m.transliteration} — ${chalk.italic(m.meaning)}`);
+      }
+    }
+  }
+
+  lines.push('');
+  return lines.join('\n');
+}
+
+export function formatGematriaCompare(result: GematriaCompareResult): string {
+  const lines: string[] = [];
+
+  lines.push('');
+  lines.push(GEMATRIA_COLORS.header('    GEMATRIA — COMPARISON'));
+  lines.push('');
+
+  // Side-by-side table
+  lines.push(chalk.bold.cyan('── VALUES ──'));
+  const maxWidth = 14;
+  lines.push(`   ${'System'.padEnd(18)} ${chalk.white(result.text1.text.padEnd(maxWidth))} ${chalk.white(result.text2.text.padEnd(maxWidth))} ${'Match'}`);
+  lines.push(chalk.dim('   ' + '─'.repeat(18 + maxWidth * 2 + 10)));
+
+  // Build map for text2
+  const t2Map = new Map<string, number>();
+  for (const s of result.text2.systems) {
+    t2Map.set(s.key, s.value);
+  }
+
+  // All systems from text1
+  for (const s1 of result.text1.systems) {
+    const v2 = t2Map.get(s1.key);
+    const match = (v2 !== undefined && v2 === s1.value && s1.value > 0) ? chalk.green(' =') : '';
+    const v2Str = v2 !== undefined ? String(v2) : '-';
+    lines.push(`   ${chalk.dim(s1.name.padEnd(18))} ${String(s1.value).padEnd(maxWidth)} ${v2Str.padEnd(maxWidth)} ${match}`);
+  }
+
+  // Shared values summary
+  if (result.shared_values.length > 0) {
+    lines.push('');
+    lines.push(chalk.bold.cyan('── SHARED VALUES ──'));
+    for (const sv of result.shared_values) {
+      lines.push(`   ${chalk.green('=')} ${sv.system}: ${chalk.bold.white(String(sv.value))}`);
+    }
+  }
+
+  // Combined notable matches
+  const allNotable = [...result.text1.notable, ...result.text2.notable];
+  const seen = new Set<number>();
+  const unique = allNotable.filter(n => {
+    if (seen.has(n.value)) return false;
+    seen.add(n.value);
+    return true;
+  });
+  if (unique.length > 0) {
+    lines.push('');
+    lines.push(chalk.bold.cyan('── NOTABLE MATCHES ──'));
+    for (const n of unique) {
+      lines.push(`   ${chalk.bold.white(String(n.value))}`);
+      for (const m of n.matches) {
+        lines.push(`     ${chalk.dim(m.word)} ${m.transliteration} — ${chalk.italic(m.meaning)}`);
+      }
+    }
+  }
+
+  lines.push('');
+  return lines.join('\n');
+}
+
+export function formatGematriaLookup(result: GematriaLookupResult): string {
+  const lines: string[] = [];
+
+  lines.push('');
+  lines.push(GEMATRIA_COLORS.header(`    GEMATRIA LOOKUP: ${result.number}`));
+  if (result.system) {
+    lines.push(`   ${chalk.dim('System:')} ${result.system}`);
+  }
+  lines.push('');
+
+  if (result.matches.length === 0) {
+    lines.push(chalk.dim('   No known correspondences found for this number.'));
+  } else {
+    lines.push(chalk.bold.cyan('── CORRESPONDENCES ──'));
+    for (const m of result.matches) {
+      const sysColor = m.system === 'hebrew' ? GEMATRIA_COLORS.hebrew :
+        m.system === 'greek' ? GEMATRIA_COLORS.greek : GEMATRIA_COLORS.english;
+      lines.push(`   ${sysColor(m.word)} ${chalk.white(m.transliteration)}`);
+      lines.push(`     ${chalk.italic(m.meaning)} ${chalk.dim(`[${m.system}]`)}`);
+    }
+  }
+
+  lines.push('');
+  return lines.join('\n');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NUMEROLOGY FORMATTERS
+// ═══════════════════════════════════════════════════════════════
+
+const NUMEROLOGY_COLORS = {
+  number: chalk.bold.hex('#FFD700'),
+  label: chalk.bold.cyan,
+  steps: chalk.dim,
+  meaning: chalk.italic.hex('#C0C0C0'),
+  header: chalk.bold.hex('#9932CC'),
+};
+
+export function formatNumerology(result: NumerologyResult): string {
+  const lines: string[] = [];
+
+  lines.push('');
+  lines.push(NUMEROLOGY_COLORS.header('    NUMEROLOGY'));
+  lines.push('');
+
+  if (result.life_path) {
+    const lp = result.life_path;
+    lines.push(chalk.bold.cyan('── LIFE PATH ──'));
+    lines.push(`   ${chalk.dim('Date:')} ${lp.date}`);
+    lines.push(`   ${NUMEROLOGY_COLORS.number(String(lp.life_path))} ${NUMEROLOGY_COLORS.meaning(getNumberMeaning(lp.life_path))}`);
+    lines.push(`   ${NUMEROLOGY_COLORS.steps(lp.steps)}`);
+    lines.push('');
+  }
+
+  if (result.name_analysis) {
+    const na = result.name_analysis;
+    lines.push(chalk.bold.cyan('── NAME ANALYSIS ──'));
+    lines.push(`   ${chalk.dim('Name:')} ${na.name}`);
+    lines.push('');
+
+    // Letter breakdown
+    lines.push(`   ${chalk.dim('Letters:')}`);
+    const vowelLetters = na.letters.filter(l => l.type === 'vowel').map(l => `${l.letter}=${l.value}`).join('  ');
+    const consLetters = na.letters.filter(l => l.type === 'consonant').map(l => `${l.letter}=${l.value}`).join('  ');
+    lines.push(`     ${chalk.hex('#FF8C00')('Vowels:')}     ${vowelLetters}`);
+    lines.push(`     ${chalk.hex('#4169E1')('Consonants:')} ${consLetters}`);
+    lines.push('');
+
+    // Expression / Destiny
+    lines.push(`   ${NUMEROLOGY_COLORS.label('Expression/Destiny')} (all letters)`);
+    lines.push(`   ${NUMEROLOGY_COLORS.number(String(na.expression.reduced))} ${NUMEROLOGY_COLORS.meaning(getNumberMeaning(na.expression.reduced))}`);
+    lines.push(`   ${NUMEROLOGY_COLORS.steps(na.expression.steps)}`);
+    lines.push('');
+
+    // Soul Urge
+    lines.push(`   ${NUMEROLOGY_COLORS.label("Soul Urge/Heart's Desire")} (vowels)`);
+    lines.push(`   ${NUMEROLOGY_COLORS.number(String(na.soul_urge.reduced))} ${NUMEROLOGY_COLORS.meaning(getNumberMeaning(na.soul_urge.reduced))}`);
+    lines.push(`   ${NUMEROLOGY_COLORS.steps(na.soul_urge.steps)}`);
+    lines.push('');
+
+    // Personality
+    lines.push(`   ${NUMEROLOGY_COLORS.label('Personality')} (consonants)`);
+    lines.push(`   ${NUMEROLOGY_COLORS.number(String(na.personality.reduced))} ${NUMEROLOGY_COLORS.meaning(getNumberMeaning(na.personality.reduced))}`);
+    lines.push(`   ${NUMEROLOGY_COLORS.steps(na.personality.steps)}`);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+export function formatNumerologyYear(result: PersonalCycle): string {
+  const lines: string[] = [];
+
+  lines.push('');
+  lines.push(NUMEROLOGY_COLORS.header('    PERSONAL CYCLES'));
+  lines.push(`   ${chalk.dim('Birth Date:')}  ${result.birth_date}`);
+  lines.push(`   ${chalk.dim('Target Date:')} ${result.target_date}`);
+  lines.push('');
+
+  lines.push(chalk.bold.cyan('── PERSONAL YEAR ──'));
+  lines.push(`   ${NUMEROLOGY_COLORS.number(String(result.personal_year.value))} ${NUMEROLOGY_COLORS.meaning(getNumberMeaning(result.personal_year.value))}`);
+  lines.push(`   ${NUMEROLOGY_COLORS.steps(result.personal_year.steps)}`);
+  lines.push('');
+
+  lines.push(chalk.bold.cyan('── PERSONAL MONTH ──'));
+  lines.push(`   ${NUMEROLOGY_COLORS.number(String(result.personal_month.value))} ${NUMEROLOGY_COLORS.meaning(getNumberMeaning(result.personal_month.value))}`);
+  lines.push(`   ${NUMEROLOGY_COLORS.steps(result.personal_month.steps)}`);
+  lines.push('');
+
+  lines.push(chalk.bold.cyan('── PERSONAL DAY ──'));
+  lines.push(`   ${NUMEROLOGY_COLORS.number(String(result.personal_day.value))} ${NUMEROLOGY_COLORS.meaning(getNumberMeaning(result.personal_day.value))}`);
+  lines.push(`   ${NUMEROLOGY_COLORS.steps(result.personal_day.steps)}`);
+  lines.push('');
+
   return lines.join('\n');
 }

@@ -14,14 +14,18 @@ import {
   composite, solarArc, horary, score, moonExtended, transitScan, ephemerisMulti,
   tarotDraw, tarotCard, tarotDeck, tarotSpreads
 } from './lib/core.js';
-import { 
+import {
   formatChart, formatTransits, formatMoon, formatEphemeris,
-  formatSolarReturn, formatLunarReturn, formatSynastry, 
+  formatSolarReturn, formatLunarReturn, formatSynastry,
   formatProgressions, formatEphemerisRange,
   formatComposite, formatSolarArc, formatHorary,
   formatScore, formatMoonExtended, formatTransitScan, formatEphemerisMulti,
-  formatTarotDraw, formatTarotCard, formatTarotDeck, formatTarotSpreads
+  formatTarotDraw, formatTarotCard, formatTarotDeck, formatTarotSpreads,
+  formatGematria, formatGematriaCompare, formatGematriaLookup,
+  formatNumerology, formatNumerologyYear,
 } from './lib/format.js';
+import { calculateGematria, compareGematria, lookupGematria } from './lib/gematria.js';
+import { calculateNumerology, calculatePersonalCycle } from './lib/numerology.js';
 import { isError } from './types.js';
 
 const program = new Command();
@@ -78,6 +82,20 @@ EPHEMERIS & MOON
   thoth ephemeris --body pluto                        # where is pluto now?
   thoth ephemeris --body saturn --date 2027-01-15    # saturn on specific date
   thoth ephemeris-range --body pluto --from 2024-01-01 --to 2030-01-01 --step month
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GEMATRIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  thoth gematria "AKLO"                               # all systems
+  thoth gematria "אהבה"                                # Hebrew text
+  thoth gematria "Love" --compare "Will"              # compare two words
+  thoth gematria-lookup 93                             # find words matching number
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NUMEROLOGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  thoth numerology --name "John Doe" --date 1991-07-08 # full profile
+  thoth numerology-year --date 1991-07-08              # personal year cycles
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 REFERENCE
@@ -1141,6 +1159,112 @@ program
       console.log(JSON.stringify(result, null, 2));
     } else {
       console.log(formatTarotSpreads(result));
+    }
+  });
+
+// ═══════════════════════════════════════════════════════════════
+// GEMATRIA COMMANDS
+// ═══════════════════════════════════════════════════════════════
+
+program
+  .command('gematria <text>')
+  .description('Calculate gematria values for text')
+  .option('-s, --system <system>', 'Only show specific system (hebrew-standard, hebrew-ordinal, hebrew-reduced, greek, english-ordinal, english-reduced, english-sumerian, english-reverse)')
+  .option('-c, --compare <text2>', 'Compare with another word/phrase')
+  .option('--json', 'Output raw JSON')
+  .action(async (text, options) => {
+    if (options.compare) {
+      const result = compareGematria(text, options.compare, options.system);
+      if (options.json) {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        console.log(formatGematriaCompare(result));
+      }
+    } else {
+      const result = calculateGematria(text, options.system);
+      if (options.json) {
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        console.log(formatGematria(result));
+      }
+    }
+  });
+
+program
+  .command('gematria-lookup <number>')
+  .description('Find words/concepts matching a gematria value')
+  .option('-s, --system <system>', 'Filter by system (hebrew, greek, english)')
+  .option('-l, --limit <n>', 'Maximum results', parseInt)
+  .option('--json', 'Output raw JSON')
+  .action(async (number, options) => {
+    const num = parseInt(number, 10);
+    if (isNaN(num)) {
+      console.error(chalk.red('Error: Please provide a valid number'));
+      process.exit(1);
+    }
+    const result = lookupGematria(num, options.system, options.limit);
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(formatGematriaLookup(result));
+    }
+  });
+
+// ═══════════════════════════════════════════════════════════════
+// NUMEROLOGY COMMANDS
+// ═══════════════════════════════════════════════════════════════
+
+program
+  .command('numerology [input]')
+  .description('Calculate core numerology numbers')
+  .option('-d, --date <date>', 'Birth date (YYYY-MM-DD)')
+  .option('-n, --name <name>', 'Full birth name')
+  .option('--json', 'Output raw JSON')
+  .action(async (input, options) => {
+    let name = options.name;
+    let date = options.date;
+
+    // Auto-detect positional input
+    if (input) {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(input)) {
+        date = date || input;
+      } else {
+        name = name || input;
+      }
+    }
+
+    if (!name && !date) {
+      console.error(chalk.red('Error: Provide --name and/or --date, or a positional argument'));
+      process.exit(1);
+    }
+
+    const result = calculateNumerology({ name, date });
+
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(formatNumerology(result));
+    }
+  });
+
+program
+  .command('numerology-year')
+  .description('Calculate Personal Year, Month, and Day numbers')
+  .requiredOption('-d, --date <date>', 'Birth date (YYYY-MM-DD)')
+  .option('-t, --target-date <date>', 'Target date (YYYY-MM-DD, default: today)')
+  .option('--json', 'Output raw JSON')
+  .action(async (options) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(options.date)) {
+      console.error(chalk.red('Error: Date must be in YYYY-MM-DD format'));
+      process.exit(1);
+    }
+
+    const result = calculatePersonalCycle(options.date, options.targetDate);
+
+    if (options.json) {
+      console.log(JSON.stringify(result, null, 2));
+    } else {
+      console.log(formatNumerologyYear(result));
     }
   });
 
