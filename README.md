@@ -1,6 +1,13 @@
+<p align="center">
+  <img src="og-image.jpg" alt="thoth-cli" width="600">
+</p>
+
 # 𓅝 thoth-cli
 
-**Hermetic divination from the command line. v0.2.26**
+**Hermetic divination from the command line. v0.2.27**
+
+[![npm version](https://img.shields.io/npm/v/thoth-cli.svg)](https://www.npmjs.com/package/thoth-cli)
+[![license](https://img.shields.io/npm/l/thoth-cli.svg)](https://github.com/aklo360/thoth-cli/blob/main/LICENSE)
 
 A powerful divination CLI built on Swiss Ephemeris (astrology), cryptographic entropy (tarot), classical systems (gematria), and Pythagorean tradition (numerology). Designed for AI agents, developers, and modern practitioners.
 
