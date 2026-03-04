@@ -1272,16 +1272,53 @@ program
 // ELECTIONAL ASTROLOGY COMMAND
 // ═══════════════════════════════════════════════════════════════
 
+// Aspect definitions with orbs
+const ASPECTS = [
+  { name: 'conjunction', symbol: '☌', angle: 0, orb: 8 },
+  { name: 'sextile', symbol: '⚹', angle: 60, orb: 4 },
+  { name: 'square', symbol: '□', angle: 90, orb: 6 },
+  { name: 'trine', symbol: '△', angle: 120, orb: 6 },
+  { name: 'opposition', symbol: '☍', angle: 180, orb: 8 },
+];
+
+// Calculate aspect between two positions
+function findAspect(pos1: number, pos2: number): { name: string; symbol: string; orb: number } | null {
+  const diff = Math.abs(pos1 - pos2);
+  const angle = diff > 180 ? 360 - diff : diff;
+  
+  for (const aspect of ASPECTS) {
+    const orbDiff = Math.abs(angle - aspect.angle);
+    if (orbDiff <= aspect.orb) {
+      return { name: aspect.name, symbol: aspect.symbol, orb: Math.round(orbDiff * 10) / 10 };
+    }
+  }
+  return null;
+}
+
+// Moon phase from Sun-Moon angle
+function getMoonPhase(sunPos: number, moonPos: number): { name: string; icon: string } {
+  let angle = moonPos - sunPos;
+  if (angle < 0) angle += 360;
+  
+  if (angle < 22.5 || angle >= 337.5) return { name: 'New Moon', icon: '🌑' };
+  if (angle < 67.5) return { name: 'Waxing Crescent', icon: '🌒' };
+  if (angle < 112.5) return { name: 'First Quarter', icon: '🌓' };
+  if (angle < 157.5) return { name: 'Waxing Gibbous', icon: '🌔' };
+  if (angle < 202.5) return { name: 'Full Moon', icon: '🌕' };
+  if (angle < 247.5) return { name: 'Waning Gibbous', icon: '🌖' };
+  if (angle < 292.5) return { name: 'Last Quarter', icon: '🌗' };
+  return { name: 'Waning Crescent', icon: '🌘' };
+}
+
 program
   .command('electional')
-  .description('Scan a date range for electional astrology data (moon phases, retrogrades, aspects)')
+  .description('Comprehensive electional astrology scan — moon phases, aspects, retrogrades, VOC')
   .requiredOption('--start <date>', 'Start date (YYYY-MM-DD)')
   .requiredOption('--end <date>', 'End date (YYYY-MM-DD)')
-  .option('--city <city>', 'City for local times', 'New York')
-  .option('--nation <nation>', 'Country code', 'US')
+  .option('--step <step>', 'Granularity: day, week (default: day)', 'day')
   .option('--json', 'Output raw JSON')
   .action(async (options) => {
-    const spinner = ora('Scanning date range for electional data...').start();
+    const spinner = ora('Scanning date range (one efficient query)...').start();
     
     const startDate = new Date(options.start);
     const endDate = new Date(options.end);
@@ -1298,162 +1335,214 @@ program
       process.exit(1);
     }
     
-    const electionalData: {
-      range: { start: string; end: string; days: number };
-      moonPhases: Array<{ date: string; phase: string; sign: string; illumination: number }>;
-      retrogrades: Array<{ planet: string; status: string; sign: string; dates?: string }>;
-      planetaryPositions: Array<{ date: string; planets: Record<string, { sign: string; degree: number; retrograde: boolean }> }>;
-      keyDates: Array<{ date: string; event: string; quality: string }>;
-    } = {
-      range: {
-        start: options.start,
-        end: options.end,
-        days: Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)),
-      },
-      moonPhases: [],
-      retrogrades: [],
-      planetaryPositions: [],
-      keyDates: [],
-    };
+    // ONE efficient call for all data
+    const [startYear, startMonth, startDay] = options.start.split('-').map(Number);
+    const [endYear, endMonth, endDay] = options.end.split('-').map(Number);
     
-    // Scan moon phases weekly through the range
-    const currentDate = new Date(startDate);
-    const moonDates: string[] = [];
-    while (currentDate <= endDate) {
-      moonDates.push(currentDate.toISOString().split('T')[0]);
-      currentDate.setDate(currentDate.getDate() + 3); // Every 3 days for moon
+    const multiResult = await ephemerisMulti({
+      bodies: 'sun,moon,mercury,venus,mars,jupiter,saturn,uranus,neptune,pluto',
+      startYear, startMonth, startDay,
+      endYear, endMonth, endDay,
+      step: options.step as 'day' | 'week' | 'hour' | 'month',
+    });
+    
+    spinner.stop();
+    
+    if (isError(multiResult)) {
+      console.error(chalk.red(`Error: ${multiResult.error}`));
+      process.exit(1);
     }
     
-    // Get moon data for each sample date
-    for (const dateStr of moonDates) {
-      const [year, month, day] = dateStr.split('-').map(Number);
-      const moonResult = await moon({ year, month, day });
-      if (!isError(moonResult)) {
-        electionalData.moonPhases.push({
-          date: dateStr,
-          phase: moonResult.phase?.name || 'Unknown',
-          sign: moonResult.moon?.sign || 'Unknown',
-          illumination: moonResult.phase?.illumination || 0,
-        });
-        
-        // Mark new/full moons as key dates
-        const phaseName = moonResult.phase?.name?.toLowerCase() || '';
-        if (phaseName.includes('new moon')) {
-          electionalData.keyDates.push({
-            date: dateStr,
-            event: `New Moon in ${moonResult.moon?.sign}`,
-            quality: 'beginnings',
-          });
-        } else if (phaseName.includes('full moon')) {
-          electionalData.keyDates.push({
-            date: dateStr,
-            event: `Full Moon in ${moonResult.moon?.sign}`,
-            quality: 'culmination',
-          });
+    const positions = multiResult.positions || [];
+    const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    
+    // Build comprehensive electional data
+    interface DayData {
+      date: string;
+      moon: { sign: string; degree: number; phase: string; phaseIcon: string };
+      planets: Record<string, { sign: string; degree: number; retrograde: boolean }>;
+      aspects: Array<{ planet1: string; planet2: string; aspect: string; symbol: string; orb: number }>;
+      vocMoon: boolean;
+      quality: 'excellent' | 'good' | 'neutral' | 'challenging' | 'difficult';
+    }
+    
+    const dailyData: DayData[] = [];
+    const keyDates: Array<{ date: string; event: string; quality: string }> = [];
+    const retrogradeWindows: Record<string, { start?: string; end?: string; sign: string }> = {};
+    
+    let prevMoonSign = '';
+    
+    for (const pos of positions) {
+      const dateStr = pos.datetime.split('T')[0];
+      const sun = pos.sun as { sign: string; position: number; abs_position: number; retrograde: boolean };
+      const moonData = pos.moon as { sign: string; position: number; abs_position: number; retrograde: boolean };
+      
+      // Moon phase from Sun-Moon positions
+      const phase = getMoonPhase(sun.abs_position, moonData.abs_position);
+      
+      // Check for New/Full Moon (tight orb)
+      const sunMoonAngle = Math.abs(moonData.abs_position - sun.abs_position);
+      const normalizedAngle = sunMoonAngle > 180 ? 360 - sunMoonAngle : sunMoonAngle;
+      if (normalizedAngle < 5) {
+        keyDates.push({ date: dateStr, event: `New Moon in ${moonData.sign}`, quality: 'beginnings' });
+      } else if (Math.abs(normalizedAngle - 180) < 5) {
+        keyDates.push({ date: dateStr, event: `Full Moon in ${moonData.sign}`, quality: 'culmination' });
+      }
+      
+      // Sign ingress detection
+      if (prevMoonSign && prevMoonSign !== moonData.sign) {
+        keyDates.push({ date: dateStr, event: `Moon enters ${moonData.sign}`, quality: 'ingress' });
+      }
+      prevMoonSign = moonData.sign;
+      
+      // Collect all planets
+      const planets: Record<string, { sign: string; degree: number; retrograde: boolean; absPos: number }> = {};
+      const planetNames = ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+      
+      for (const pName of planetNames) {
+        const p = pos[pName] as { sign: string; position: number; abs_position: number; retrograde: boolean } | undefined;
+        if (p) {
+          planets[pName] = { sign: p.sign, degree: p.position, retrograde: p.retrograde, absPos: p.abs_position };
+          
+          // Track retrograde windows
+          if (p.retrograde) {
+            if (!retrogradeWindows[pName]) {
+              retrogradeWindows[pName] = { start: dateStr, sign: p.sign };
+            }
+            retrogradeWindows[pName].end = dateStr;
+          }
         }
       }
-    }
-    
-    // Get planetary positions at start, middle, and end
-    const sampleDates = [
-      options.start,
-      new Date((startDate.getTime() + endDate.getTime()) / 2).toISOString().split('T')[0],
-      options.end,
-    ];
-    
-    const planets = ['mercury', 'venus', 'mars', 'jupiter', 'saturn'];
-    
-    for (const dateStr of sampleDates) {
-      const [year, month, day] = dateStr.split('-').map(Number);
-      const positions: Record<string, { sign: string; degree: number; retrograde: boolean }> = {};
       
-      for (const body of planets) {
-        const ephResult = await ephemeris({ body, year, month, day });
-        if (!isError(ephResult)) {
-          positions[body] = {
-            sign: ephResult.sign || 'Unknown',
-            degree: ephResult.position || 0,
-            retrograde: ephResult.retrograde || false,
-          };
-          
-          // Track retrogrades
-          if (ephResult.retrograde && dateStr === options.start) {
-            electionalData.retrogrades.push({
-              planet: body.charAt(0).toUpperCase() + body.slice(1),
-              status: 'Retrograde',
-              sign: ephResult.sign || 'Unknown',
+      // Calculate aspects between planets
+      const aspects: Array<{ planet1: string; planet2: string; aspect: string; symbol: string; orb: number }> = [];
+      const allBodies = [{ name: 'moon', pos: moonData.abs_position }, ...Object.entries(planets).map(([n, d]) => ({ name: n, pos: d.absPos }))];
+      
+      for (let i = 0; i < allBodies.length; i++) {
+        for (let j = i + 1; j < allBodies.length; j++) {
+          const asp = findAspect(allBodies[i].pos, allBodies[j].pos);
+          if (asp) {
+            aspects.push({
+              planet1: allBodies[i].name,
+              planet2: allBodies[j].name,
+              aspect: asp.name,
+              symbol: asp.symbol,
+              orb: asp.orb,
             });
           }
         }
       }
       
-      electionalData.planetaryPositions.push({
+      // VOC Moon: Moon makes no applying major aspects before leaving sign
+      // Simplified: if Moon has no aspects with orb < 3°, likely VOC
+      const moonAspects = aspects.filter(a => a.planet1 === 'moon' || a.planet2 === 'moon');
+      const tightMoonAspects = moonAspects.filter(a => a.orb < 3);
+      const vocMoon = tightMoonAspects.length === 0;
+      
+      // Quality score based on aspects
+      let score = 0;
+      for (const asp of aspects) {
+        if (asp.aspect === 'trine' || asp.aspect === 'sextile') score += 1;
+        if (asp.aspect === 'square') score -= 1;
+        if (asp.aspect === 'opposition') score -= 0.5;
+        // Bonus for Jupiter/Venus aspects
+        if ((asp.planet1 === 'jupiter' || asp.planet2 === 'jupiter') && (asp.aspect === 'trine' || asp.aspect === 'sextile')) score += 1;
+        if ((asp.planet1 === 'venus' || asp.planet2 === 'venus') && (asp.aspect === 'trine' || asp.aspect === 'sextile')) score += 0.5;
+      }
+      // Mercury Rx penalty
+      if (planets.mercury?.retrograde) score -= 2;
+      
+      const quality: DayData['quality'] = 
+        score >= 4 ? 'excellent' :
+        score >= 2 ? 'good' :
+        score >= 0 ? 'neutral' :
+        score >= -2 ? 'challenging' : 'difficult';
+      
+      dailyData.push({
         date: dateStr,
-        planets: positions,
+        moon: { sign: moonData.sign, degree: moonData.position, phase: phase.name, phaseIcon: phase.icon },
+        planets: Object.fromEntries(Object.entries(planets).map(([k, v]) => [k, { sign: v.sign, degree: v.degree, retrograde: v.retrograde }])),
+        aspects,
+        vocMoon,
+        quality,
       });
     }
     
-    // Check Mercury specifically for retrograde (critical for electional)
-    const mercuryStart = electionalData.planetaryPositions[0]?.planets?.mercury;
-    const mercuryEnd = electionalData.planetaryPositions[2]?.planets?.mercury;
-    if (mercuryStart?.retrograde || mercuryEnd?.retrograde) {
-      electionalData.keyDates.push({
-        date: mercuryStart?.retrograde ? options.start : options.end,
-        event: 'Mercury Retrograde Active',
-        quality: 'caution',
-      });
-    }
-    
-    spinner.stop();
+    // Build output
+    const output = {
+      range: { start: options.start, end: options.end, days, step: options.step },
+      dailyData,
+      keyDates,
+      retrogradeWindows,
+      summary: {
+        excellentDays: dailyData.filter(d => d.quality === 'excellent').map(d => d.date),
+        goodDays: dailyData.filter(d => d.quality === 'good').map(d => d.date),
+        avoidDays: dailyData.filter(d => d.quality === 'difficult').map(d => d.date),
+        vocMoonDays: dailyData.filter(d => d.vocMoon).map(d => d.date),
+      },
+    };
     
     if (options.json) {
-      console.log(JSON.stringify(electionalData, null, 2));
+      console.log(JSON.stringify(output, null, 2));
     } else {
       // Formatted output
-      console.log(chalk.yellow('\n𓅝') + chalk.dim(' Electional Scan'));
-      console.log(chalk.dim(`   ${electionalData.range.start} to ${electionalData.range.end} (${electionalData.range.days} days)\n`));
+      console.log(chalk.yellow('\n𓅝') + chalk.dim(' Electional Astrology Scan'));
+      console.log(chalk.dim(`   ${output.range.start} to ${output.range.end} (${output.range.days} days)\n`));
       
-      // Moon Phases
-      console.log(chalk.dim('── MOON PHASES ──'));
-      for (const mp of electionalData.moonPhases) {
-        const phaseIcon = mp.phase.toLowerCase().includes('new') ? '🌑' :
-                          mp.phase.toLowerCase().includes('full') ? '🌕' :
-                          mp.phase.toLowerCase().includes('first') ? '🌓' :
-                          mp.phase.toLowerCase().includes('last') ? '🌗' :
-                          mp.phase.toLowerCase().includes('waxing') ? '🌒' : '🌘';
-        console.log(`   ${mp.date}  ${phaseIcon} ${mp.phase} in ${mp.sign} (${Math.round(mp.illumination)}%)`);
+      // Summary first
+      console.log(chalk.dim('── SUMMARY ──'));
+      if (output.summary.excellentDays.length > 0) {
+        console.log(chalk.green(`   ★ Excellent: ${output.summary.excellentDays.join(', ')}`));
+      }
+      if (output.summary.goodDays.length > 0) {
+        console.log(chalk.cyan(`   ✓ Good: ${output.summary.goodDays.join(', ')}`));
+      }
+      if (output.summary.avoidDays.length > 0) {
+        console.log(chalk.red(`   ✗ Avoid: ${output.summary.avoidDays.join(', ')}`));
+      }
+      if (output.summary.vocMoonDays.length > 0) {
+        console.log(chalk.yellow(`   ◯ VOC Moon: ${output.summary.vocMoonDays.join(', ')}`));
       }
       
       // Retrogrades
-      if (electionalData.retrogrades.length > 0) {
+      const rxPlanets = Object.entries(output.retrogradeWindows);
+      if (rxPlanets.length > 0) {
         console.log(chalk.dim('\n── RETROGRADES ──'));
-        for (const rx of electionalData.retrogrades) {
-          console.log(chalk.red(`   ℞ ${rx.planet} in ${rx.sign}`));
-        }
-      } else {
-        console.log(chalk.dim('\n── RETROGRADES ──'));
-        console.log(chalk.green('   No major retrogrades at range start'));
-      }
-      
-      // Planetary Positions
-      console.log(chalk.dim('\n── PLANETARY POSITIONS ──'));
-      for (const pos of electionalData.planetaryPositions) {
-        console.log(chalk.dim(`   ${pos.date}:`));
-        for (const [planet, data] of Object.entries(pos.planets)) {
-          const rx = data.retrograde ? chalk.red(' ℞') : '';
-          console.log(`     ${planet.charAt(0).toUpperCase() + planet.slice(1)}: ${data.sign} ${data.degree.toFixed(1)}°${rx}`);
+        for (const [planet, window] of rxPlanets) {
+          console.log(chalk.red(`   ℞ ${planet.charAt(0).toUpperCase() + planet.slice(1)} in ${window.sign} (${window.start} – ${window.end})`));
         }
       }
       
       // Key Dates
-      if (electionalData.keyDates.length > 0) {
+      if (output.keyDates.length > 0) {
         console.log(chalk.dim('\n── KEY DATES ──'));
-        for (const kd of electionalData.keyDates) {
+        for (const kd of output.keyDates) {
           const icon = kd.quality === 'beginnings' ? '🌑' :
                        kd.quality === 'culmination' ? '🌕' :
-                       kd.quality === 'caution' ? '⚠️' : '✨';
-          const color = kd.quality === 'caution' ? chalk.yellow : chalk.white;
-          console.log(color(`   ${kd.date}  ${icon} ${kd.event}`));
+                       kd.quality === 'ingress' ? '→' : '✨';
+          console.log(`   ${kd.date}  ${icon} ${kd.event}`);
+        }
+      }
+      
+      // Daily breakdown (condensed)
+      console.log(chalk.dim('\n── DAILY POSITIONS ──'));
+      for (const day of dailyData) {
+        const qColor = day.quality === 'excellent' ? chalk.green :
+                       day.quality === 'good' ? chalk.cyan :
+                       day.quality === 'challenging' ? chalk.yellow :
+                       day.quality === 'difficult' ? chalk.red : chalk.white;
+        const qIcon = day.quality === 'excellent' ? '★' :
+                      day.quality === 'good' ? '✓' :
+                      day.quality === 'challenging' ? '!' :
+                      day.quality === 'difficult' ? '✗' : '·';
+        const vocFlag = day.vocMoon ? chalk.yellow(' [VOC]') : '';
+        console.log(qColor(`   ${day.date} ${qIcon} ${day.moon.phaseIcon} Moon ${day.moon.sign} ${day.moon.degree.toFixed(0)}°${vocFlag}`));
+        
+        // Show tight aspects
+        const tightAspects = day.aspects.filter(a => a.orb < 2);
+        if (tightAspects.length > 0) {
+          const aspStr = tightAspects.map(a => `${a.planet1}${a.symbol}${a.planet2}`).join(' ');
+          console.log(chalk.dim(`             ${aspStr}`));
         }
       }
       
@@ -1463,7 +1552,7 @@ program
 
 // Banner
 console.log(chalk.dim(''));
-console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.24'));
+console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.25'));
 console.log(chalk.dim(''));
 
 program.parse();
