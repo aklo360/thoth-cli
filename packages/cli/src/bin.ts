@@ -1316,6 +1316,10 @@ program
   .requiredOption('--start <date>', 'Start date (YYYY-MM-DD)')
   .requiredOption('--end <date>', 'End date (YYYY-MM-DD)')
   .option('--step <step>', 'Granularity: day, week (default: day)', 'day')
+  .option('--city <city>', 'City for local context (optional)')
+  .option('--nation <nation>', 'Country code (default: US)', 'US')
+  .option('--lat <lat>', 'Latitude (optional)', parseFloat)
+  .option('--lng <lng>', 'Longitude (optional)', parseFloat)
   .option('--json', 'Output raw JSON')
   .action(async (options) => {
     const spinner = ora('Scanning date range (one efficient query)...').start();
@@ -1339,11 +1343,17 @@ program
     const [startYear, startMonth, startDay] = options.start.split('-').map(Number);
     const [endYear, endMonth, endDay] = options.end.split('-').map(Number);
     
+    // Build location string for output
+    const location = options.city ? `${options.city}, ${options.nation}` : 
+                     (options.lat && options.lng) ? `${options.lat}°, ${options.lng}°` : null;
+    
     const multiResult = await ephemerisMulti({
       bodies: 'sun,moon,mercury,venus,mars,jupiter,saturn,uranus,neptune,pluto',
       startYear, startMonth, startDay,
       endYear, endMonth, endDay,
       step: options.step as 'day' | 'week' | 'hour' | 'month',
+      lat: options.lat,
+      lng: options.lng,
     });
     
     spinner.stop();
@@ -1470,7 +1480,7 @@ program
     
     // Build output
     const output = {
-      range: { start: options.start, end: options.end, days, step: options.step },
+      range: { start: options.start, end: options.end, days, step: options.step, location },
       dailyData,
       keyDates,
       retrogradeWindows,
@@ -1552,7 +1562,7 @@ program
 
 // Banner
 console.log(chalk.dim(''));
-console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.25'));
+console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.26'));
 console.log(chalk.dim(''));
 
 program.parse();
