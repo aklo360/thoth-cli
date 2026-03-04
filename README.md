@@ -1,26 +1,46 @@
 # 𓅝 thoth-cli
 
-**Hermetic astrology from the command line.**
+**Hermetic divination from the command line. v0.2.26**
 
-A powerful astrological calculation CLI built on [Kerykeion](https://github.com/g-battaglia/kerykeion) and Swiss Ephemeris. Designed for AI agents, developers, and modern practitioners who need precise calculations with clean output.
+A powerful divination CLI built on Swiss Ephemeris (astrology), cryptographic entropy (tarot), classical systems (gematria), and Pythagorean tradition (numerology). Designed for AI agents, developers, and modern practitioners.
 
 ## Features
 
-- **Natal Charts** — Full birth charts with planets, houses, aspects, and balances
-- **Transits** — Current planetary positions relative to your natal chart
+### Astrology
+- **Natal Charts** — Full birth charts with planets, houses, aspects, balances
+- **Transits** — Current planetary positions relative to natal chart
+- **Electional** ⭐ — Comprehensive timing scan (VOC Moon, retrogrades, aspects, quality scores)
 - **Solar Returns** — Annual birthday charts for year-ahead themes
 - **Lunar Returns** — Monthly emotional cycle charts
 - **Synastry** — Relationship compatibility between two charts
-- **Composite Charts** — Merged relationship chart (midpoint method)
+- **Composite** — Merged relationship chart (midpoint method)
 - **Progressions** — Secondary progressions (day-for-a-year)
 - **Solar Arc** — Solar arc directions for timing
 - **Horary** — Question-based divination charts with traditional rules
 - **Ephemeris** — Position of any celestial body on any date
-- **Ephemeris Range** — Track a planet through signs over time
 - **Moon Phases** — Current lunar phase and position
-- **Symbol Reference** — Complete guide to astrological symbols and meanings
+
+### Tarot
+- **Card Draws** — Single card or spreads with `secrets.SystemRandom` (true cryptographic entropy)
+- **Spreads** — Celtic Cross, 3-card, Horseshoe, Relationship, Decision
+- **Card Lookup** — Get card meanings by name or number
+- **Reversals** — Optional reversed card support
+
+### Gematria
+- **Hebrew** — Standard, Ordinal, Reduced
+- **Greek** — Isopsephy
+- **English** — Ordinal, Reduced, Sumerian, Reverse
+- **Lookup** — Find words matching a gematria value (e.g., 93 = Thelema)
+
+### Numerology
+- **Core Numbers** — Life Path, Expression, Soul Urge, Personality
+- **Personal Cycles** — Personal Year, Month, Day
+- **Master Numbers** — 11, 22, 33 preserved
+
+### Output
 - **Sephirotic Colors** — Kabbalistic color correspondences throughout
 - **JSON Output** — Machine-readable output for AI/automation
+- **SVG Charts** — Visual chart output
 
 ## Installation
 
@@ -55,9 +75,43 @@ thoth moon
 # Where is Pluto?
 thoth ephemeris --body pluto
 
+# Electional timing (find optimal dates)
+thoth electional --start 2026-03-15 --end 2026-04-15
+
+# Tarot reading
+thoth tarot -s 3-card -q "Career guidance"
+
+# Gematria
+thoth gematria "THOTH"
+
+# Numerology
+thoth numerology --date 1991-07-08 --name "John Doe"
+
 # Symbol reference
 thoth key
 ```
+
+---
+
+## 🔮 ACP Services (For AI Agents)
+
+Order readings directly via Agent Commerce Protocol:
+
+**Seller Wallet:** `0x7C8BA596afb5FD55B58FcCFCaAB926f1C1D2d9aA`
+
+| Service | Price | Description |
+|---------|-------|-------------|
+| `tarot_single` | $0.25 | Single card draw |
+| `tarot_spread` | $0.50 | 3-card spread |
+| `gematria_reading` | $0.50 | Letter-number analysis |
+| `numerology_full` | $0.50 | Full numerology profile |
+| `transit_reading` | $1.00 | Current transits |
+| `cosmic_weather` | $1.00 | Universal sky report |
+| `electional_astrology` | $1.00 | Optimal timing |
+| `natal_chart` | $2.00 | Full birth chart |
+| `agent_natal_chart` | $2.00 | AI agent charts |
+
+See [thothcli.com/skillmd](https://thothcli.com/skillmd) for full ACP documentation.
 
 ---
 
