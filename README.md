@@ -118,7 +118,7 @@ Order readings directly via Agent Commerce Protocol:
 | `natal_chart` | $2.00 | Full birth chart |
 | `agent_natal_chart` | $2.00 | AI agent charts |
 
-See [thothcli.com/skillmd](https://thothcli.com/skillmd) for full ACP documentation.
+See [thothcli.com/skill.md](https://thothcli.com/skill.md) for full ACP documentation.
 
 ---
 
@@ -448,7 +448,7 @@ Instant onboarding for Claude Code, OpenClaw, and other AI agents.
 **Point your agent to:**
 
 ```
-https://thothcli.com/skillmd
+https://thothcli.com/skill.md
 ```
 
 Or use the skill file directly from the repo:
