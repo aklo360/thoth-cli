@@ -28,6 +28,8 @@ import { calculateGematria, compareGematria, lookupGematria } from './lib/gematr
 import { calculateNumerology, calculatePersonalCycle } from './lib/numerology.js';
 import { isError } from './types.js';
 
+const CLI_VERSION = '0.2.27';
+
 const program = new Command();
 
 program
@@ -101,7 +103,7 @@ NUMEROLOGY
 REFERENCE
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   thoth key                                           # full symbol reference`)
-  .version('0.2.21');
+  .version(CLI_VERSION);
 
 // Chart command
 program
@@ -1562,7 +1564,7 @@ program
 
 // Banner
 console.log(chalk.dim(''));
-console.log(chalk.yellow('  𓅝') + chalk.dim(' thoth-cli v0.2.27'));
+console.log(chalk.yellow('  𓅝') + chalk.dim(` thoth-cli v${CLI_VERSION}`));
 console.log(chalk.dim(''));
 
 program.parse();

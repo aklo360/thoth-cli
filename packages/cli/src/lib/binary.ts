@@ -56,6 +56,10 @@ export function getBinaryPath(): string {
   
   // Look in various locations
   const possiblePaths = [
+    // Linked development checkout: prefer the local Python core when available.
+    // This keeps the CLI in sync with source-only commands that may not exist in
+    // the last published PyInstaller binary.
+    join(__dirname, '..', '..', 'core', '.venv', 'bin', binaryName),
     // Installed via npm (production) - dist/ is one level down from package root
     join(__dirname, '..', 'bin', platformKey, binaryName),
     // Installed via npm (alt path)

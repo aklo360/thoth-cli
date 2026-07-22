@@ -2,6 +2,14 @@
 
 All notable changes to thoth-cli will be documented in this file.
 
+## Unreleased
+
+### Changed
+
+- Synced `packages/cli/package-lock.json` root metadata to package version `0.2.27` during Mini setup.
+- Made linked development checkouts prefer the local Python core virtualenv before the packaged PyInstaller binary, keeping source-only commands available during local setup.
+- Single-sourced the CLI version displayed by `thoth --version` and the startup banner.
+
 ## [0.2.1] - 2026-03-02
 
 ### Added
