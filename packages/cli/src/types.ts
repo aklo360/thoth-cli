@@ -22,6 +22,13 @@ export interface LunarPhase {
 }
 
 export interface ChartResult {
+  full?: {
+    schema_version: number;
+    engine: Record<string, string>;
+    subject: Record<string, unknown>;
+    aspects: Array<Record<string, unknown>>;
+    aspect_settings: Record<string, unknown>;
+  };
   name: string;
   datetime: {
     year: number;
@@ -227,6 +234,8 @@ export interface EphemerisRangeResult {
 
 // Options types
 export interface ChartOptions {
+  timezone?: string;
+  full?: boolean;
   year: number;
   month: number;
   day: number;

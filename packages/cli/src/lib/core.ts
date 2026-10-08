@@ -86,7 +86,12 @@ export async function chart(options: ChartOptions): Promise<ThothResult<ChartRes
     '--name', options.name ?? 'Subject',
   ];
   
-  if (options.city) {
+  if (options.timezone) {
+    args.push('--timezone', options.timezone, '--nation', options.nation ?? 'US');
+    if (options.lat !== undefined) args.push('--lat', String(options.lat));
+    if (options.lng !== undefined) args.push('--lng', String(options.lng));
+    if (options.city) args.push('--city', options.city);
+  } else if (options.city) {
     args.push('--city', options.city);
     args.push('--nation', options.nation ?? 'US');
   } else if (options.lat !== undefined && options.lng !== undefined) {
@@ -97,6 +102,7 @@ export async function chart(options: ChartOptions): Promise<ThothResult<ChartRes
   if (options.svg) {
     args.push('--svg');
   }
+  if (options.full) args.push('--full');
   
   return execute<ChartResult>('chart', args);
 }

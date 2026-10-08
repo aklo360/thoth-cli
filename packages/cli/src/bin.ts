@@ -116,11 +116,13 @@ program
   .option('--city <city>', 'City name')
   .option('--nation <nation>', 'Country code', 'US')
   .option('--name <name>', 'Name', 'Subject')
+  .option('--timezone <zone>', 'IANA timezone; requires --lat and --lng, calculates offline')
+  .option('--full', 'Output complete engine data and calculation metadata as JSON')
   .option('--json', 'Output raw JSON')
   .option('--svg', 'Output SVG chart')
   .option('--svg-file <path>', 'Save SVG to file')
   .action(async (options) => {
-    if (!options.city && (!options.lat || !options.lng)) {
+    if (!options.city && (options.lat === undefined || options.lng === undefined)) {
       console.error(chalk.red('Error: Must provide either --city or both --lat and --lng'));
       process.exit(1);
     }
@@ -137,6 +139,8 @@ program
       city: options.city,
       nation: options.nation,
       name: options.name,
+      timezone: options.timezone,
+      full: options.full,
       svg: options.svg || options.svgFile,
     });
     
@@ -150,7 +154,7 @@ program
     if (result.svg && options.svgFile) {
       writeFileSync(options.svgFile, result.svg);
       console.log(chalk.green(`✓ SVG saved to ${options.svgFile}`));
-    } else if (options.json || result.svg) {
+    } else if (options.json || options.full || result.svg) {
       console.log(JSON.stringify(result, null, 2));
     } else {
       console.log(formatChart(result));
@@ -1563,8 +1567,10 @@ program
   });
 
 // Banner
-console.log(chalk.dim(''));
-console.log(chalk.yellow('  𓅝') + chalk.dim(` thoth-cli v${CLI_VERSION}`));
-console.log(chalk.dim(''));
+if (!process.argv.includes('--json') && !process.argv.includes('--full')) {
+  console.log(chalk.dim(''));
+  console.log(chalk.yellow('  𓅝') + chalk.dim(` thoth-cli v${CLI_VERSION}`));
+  console.log(chalk.dim(''));
+}
 
 program.parse();

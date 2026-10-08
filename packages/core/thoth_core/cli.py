@@ -118,10 +118,24 @@ def chart(
     name: str = typer.Option("Subject", help="Subject name"),
     svg: bool = typer.Option(False, help="Output SVG chart instead of JSON"),
     svg_type: str = typer.Option("Natal", help="SVG chart type: Natal, Transit, Synastry"),
+    timezone: Optional[str] = typer.Option(None, help="IANA timezone; requires --lat and --lng, calculates offline"),
+    full: bool = typer.Option(False, help="Include the complete engine subject, aspects, and calculation metadata"),
 ):
     """Calculate natal chart."""
     try:
-        subject = create_subject(name, year, month, day, hour, minute, city, nation, lat, lng)
+        if full and svg:
+            raise ValueError("--full cannot be combined with --svg")
+        if timezone:
+            if lat is None or lng is None:
+                raise ValueError("--timezone requires both --lat and --lng")
+            from kerykeion import AstrologicalSubject
+            subject = AstrologicalSubject(
+                name, year, month, day, hour, minute,
+                city=city or "Coordinates", nation=nation, lat=lat, lng=lng,
+                tz_str=timezone, online=False,
+            )
+        else:
+            subject = create_subject(name, year, month, day, hour, minute, city, nation, lat, lng)
         
         # If SVG requested, generate and output
         if svg:
@@ -170,7 +184,7 @@ def chart(
         
         lunar_phase = extract_lunar_phase(subject)
         
-        output_json({
+        result = {
             "name": name,
             "datetime": {
                 "year": year,
@@ -198,7 +212,29 @@ def chart(
                 "sign": subject.tenth_house.sign if hasattr(subject, 'tenth_house') else None,
                 "position": round(subject.tenth_house.position, 4) if hasattr(subject, 'tenth_house') else None,
             },
-        })
+        }
+        if full:
+            from importlib.metadata import version
+            result["full"] = {
+                "schema_version": 1,
+                "engine": {
+                    "thoth_core": version("thoth-core"),
+                    "kerykeion": version("kerykeion"),
+                    "pyswisseph": version("pyswisseph"),
+                },
+                "subject": json.loads(subject.json()),
+                "aspects": [
+                    asp.model_dump(mode="json") if hasattr(asp, "model_dump") else dict(asp)
+                    for asp in natal_aspects.all_aspects
+                ],
+                "aspect_settings": {
+                    "active_points": getattr(natal_aspects, "active_points", None),
+                    "active_aspects": getattr(natal_aspects, "active_aspects", None),
+                    "legacy_settings": getattr(natal_aspects, "aspects_settings", None),
+                    "summary_orb_limit": 8,
+                },
+            }
+        output_json(result)
         
     except Exception as e:
         output_error(str(e))
